@@ -328,13 +328,13 @@ bool interEstVide(Intersection* inter)
 	return false;
 }
 
-Intersection** creerTableInter(int dim) 
+Intersection** creerTableInter() 
 { 
 	int posX = MARGE_FEN; // positionnement en x
 	int posY = MARGE_FEN; // positionnement en y
 	float saut = getCoteCase(); // distance à parcourir en deux intersections
 	
-	Intersection** lesInters = malloc(dim*dim*sizeof(Intersection*));
+	Intersection** lesInters = malloc(dims_plateau*dims_plateau*sizeof(Intersection*));
 	
 	// on parcourt toutes les intersections...
 	for (int i = 0; i < dims_plateau; i++) 
@@ -365,6 +365,12 @@ void freeAll()
 	free(lesInters);
 }
 
+///////////////////////////////
+// PARTIE GESTION DES REGLES //
+///////////////////////////////
+
+
+
 int main() 
 {
 	int coteFen = 18*COTE_CASE_19 + 2*MARGE_FEN;
@@ -374,7 +380,7 @@ int main()
 	// Si oublié les boutons, faire fonction qui check entrée clavier //
 	///////////////////////////////////////////////////////////////////
 	scanf("%d", &dims_plateau);
-	lesInters = creerTableInter(dims_plateau);
+	lesInters = creerTableInter();
 	
 	event_loop_plateau();
 	//event_loop_niveau();
