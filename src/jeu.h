@@ -86,7 +86,7 @@ void dessine_hoshi();
 /**
  * Remplissage du tableau contenant l'ensemble des intersections
  */
-Intersection* creerTableInter();
+Intersection** creerTableInter();
 
 /**
  * Retourne la dimension des cases selon la dimension du plateau
@@ -102,19 +102,19 @@ Coord* nouvCoord(int x, int y);
 /**
  * Crée et retourne une instance de Intersection "vide" (i.e. positions x et y à 0)
  */
-Intersection initInterVide();
+Intersection* initInterVide();
 
 /**
  * Teste si une intersection est "vide" (x = 0 et y = 0)
  * inter : l'intersection qu'on vérifie
  */
-bool interEstVide(Intersection inter);
+bool interEstVide(Intersection* inter);
 
 /**
  * Retourne l'intersection sur laquelle le joueur a cliqué
  * x,y : coordonnées x et y (du clic)
  */
-Intersection getPlacement(int x, int y);
+Intersection* getPlacement(int x, int y);
 
 /**
  * Change la valeur "estOccupe" d'une Intersection

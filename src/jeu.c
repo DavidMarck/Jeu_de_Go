@@ -13,13 +13,13 @@ const float RAYON_PIERRE_9 = 22.5; // rayon d'une pierre sur un plateau 9x9
 const int MARGE_FEN = 25;
 
 static int dims_plateau; // dimensions du plateau choisies (19, 13 ou 9)
-static Intersection* lesInters; // tableau de structures contenant les intersections du goban (plateau)
+static Intersection** lesInters; // tableau de structures contenant les intersections du goban (plateau)
 static Chaine* lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
 static Pierre tour = NOIR;  // indique le tour actuel
 
 /**
  * Mettre ici son code pour dessiner dans la fenetre (plateau)
- * 1er affichage + redessine si resizeezezezzeez
+ * 1er affichage + redessine si resize
  */
 void draw_win_plateau()
 {	
@@ -72,15 +72,13 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 {
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
-	
-	
-	Intersection inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
+	Intersection* inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
 	int estVide = interEstVide(inter); // on test la valeur de retour de getPlacement(), si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
-	int estOccupe = inter.estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
+	int estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
 	if(estVide == false && estOccupe == false) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
-		filled_circle(inter.position->posX,inter.position->posY,getRayonPierre()); // ... on la remplit...
-		setEstOccupe(nouvCoord(inter.position->posX,inter.position->posY), true); // ... on définit que l'intersection est maintement occupée...
+		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
+		setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
 		changerTour(); // ... et enfin on passe au tour suivant
 	} 
 	
@@ -105,23 +103,24 @@ void changerTour()
 	}
 }
 
-Intersection getPlacement(int x, int y) 
+Intersection* getPlacement(int x, int y) 
 {
-	Intersection inter = initInterVide(); // on initialise une Intersection quelconque ("vide")
+	Intersection* inter = initInterVide(); // on initialise une Intersection quelconque ("vide")
 	
 	int posX = 0; // position X (voir boucle)
 	int posY = 0; // position Y (voir boucle)
 	
 	int hitbox_placement = getRayonPierre(); // définit la zone cliquable autour d'une intersection pour le placement d'une pierre (= rayon d'une pierre)
 	
+	
 	// on parcourt l'ensemble des intersections du plateau...
 	for (int i = 0; i < dims_plateau; i++) 
 	{
 		for (int j = 0; j < dims_plateau; j++)
 		{
-			posX = lesInters[i * dims_plateau + j].position->posX; // récupère la coordonnée X de l'intersection
-			posY = lesInters[i * dims_plateau + j].position->posY; // récupère la coordonnée Y de l'intersection
-			
+			posX = lesInters[i * dims_plateau + j]->position->posX; // récupère la coordonnée X de l'intersection
+			posY = lesInters[i * dims_plateau + j]->position->posY; // récupère la coordonnée Y de l'intersection
+
 			// si l'utilisateur a cliqué dans le rayon de l'intersection...
 			if((posX - hitbox_placement < x) && (x < posX + hitbox_placement) && (posY -hitbox_placement < y) && (y < posY + hitbox_placement)) 
 			{
@@ -141,9 +140,9 @@ void setEstOccupe(Coord* coord, bool estOccupe)
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			// si les coord. fournies correspondent aux coordonnées de l'intersection...
-			if((lesInters[i * dims_plateau + j].position->posX == coord->posX) && (lesInters[i * dims_plateau + j].position->posY == coord->posY))
+			if((lesInters[i * dims_plateau + j]->position->posX == coord->posX) && (lesInters[i * dims_plateau + j]->position->posY == coord->posY))
 			{
-				lesInters[i * dims_plateau + j].estOccupe = estOccupe; // ... on la définit comme étant occupée
+				lesInters[i * dims_plateau + j]->estOccupe = estOccupe; // ... on la définit comme étant occupée
 			}
 		}
 	}
@@ -296,45 +295,44 @@ Coord* nouvCoord(int x, int y)
 	Coord* coord = malloc(sizeof(Coord));
 	coord->posX = x;
 	coord->posY = y;
-	
 	return coord;
 }
 
-Intersection  nouvIntersection(Coord* coord)
+Intersection*  nouvIntersection(Coord* coord)
 {
-	Intersection inter;
-	inter.position = coord;
-	inter.estOccupe = false;
+	Intersection* inter = malloc(sizeof(Intersection));
+	inter->position = coord;
+	inter->estOccupe = false;
 	
 	return inter;
 }
 
-Intersection initInterVide()
+Intersection* initInterVide()
 {
-	Intersection interVide;
+	Intersection* interVide = malloc(sizeof(Intersection));
 	
-	interVide.position = nouvCoord(0,0);
+	interVide->position = nouvCoord(0,0);
 	
 	return interVide;
 }
 
-bool interEstVide(Intersection inter)
+bool interEstVide(Intersection* inter)
 {
 	// on considère une intersection vide si x == 0 && y == 0
-	if(inter.position->posX == 0 && inter.position->posY == 0)
+	if(inter->position->posX == 0 && inter->position->posY == 0)
 	{
 		return true;
 	}
 	return false;
 }
 
-Intersection* creerTableInter(int dim) 
+Intersection** creerTableInter(int dim) 
 { 
 	int posX = MARGE_FEN; // positionnement en x
 	int posY = MARGE_FEN; // positionnement en y
 	float saut = getCoteCase(); // distance à parcourir en deux intersections
 	
-	Intersection* lesInters = malloc(dim*dim*sizeof(Intersection));
+	Intersection** lesInters = malloc(dim*dim*sizeof(Intersection*));
 	
 	// on parcourt toutes les intersections...
 	for (int i = 0; i < dims_plateau; i++) 
@@ -357,7 +355,8 @@ void freeAll()
 	{
 		for (int j = 0; j < dims_plateau; j++)
 		{
-			free(lesInters[i * dims_plateau + j].position);
+			free(lesInters[i * dims_plateau + j]->position);
+			free(lesInters[i * dims_plateau + j]);
 		}
 	}
 	
