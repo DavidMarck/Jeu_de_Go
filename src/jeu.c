@@ -78,7 +78,9 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	if(estVide == false && estOccupe == false) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
-		setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
+		//setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
+		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
+		inter->couleur = tour;
 		changerTour(); // ... et enfin on passe au tour suivant
 	} 
 	
@@ -132,21 +134,21 @@ Intersection* getPlacement(int x, int y)
 	return inter;
 }
 
-void setEstOccupe(Coord* coord, bool estOccupe)
-{
-	// on parcourt l'ensemble des intersections du plateau ...
-	for (int i = 0; i < dims_plateau; i++) 
-	{
-		for (int j = 0; j < dims_plateau; j++)
-		{
-			// si les coord. fournies correspondent aux coordonnées de l'intersection...
-			if((lesInters[i * dims_plateau + j]->position->posX == coord->posX) && (lesInters[i * dims_plateau + j]->position->posY == coord->posY))
-			{
-				lesInters[i * dims_plateau + j]->estOccupe = estOccupe; // ... on la définit comme étant occupée
-			}
-		}
-	}
-}
+//~ void setEstOccupe(Coord* coord, bool estOccupe)
+//~ {
+	//~ // on parcourt l'ensemble des intersections du plateau ...
+	//~ for (int i = 0; i < dims_plateau; i++) 
+	//~ {
+		//~ for (int j = 0; j < dims_plateau; j++)
+		//~ {
+			//~ // si les coord. fournies correspondent aux coordonnées de l'intersection...
+			//~ if((lesInters[i * dims_plateau + j]->position->posX == coord->posX) && (lesInters[i * dims_plateau + j]->position->posY == coord->posY))
+			//~ {
+				//~ lesInters[i * dims_plateau + j]->estOccupe = estOccupe; // ... on la définit comme étant occupée
+			//~ }
+		//~ }
+	//~ }
+//~ }
 
 /**
  * on a cliqué a la souris (choix du niveau):

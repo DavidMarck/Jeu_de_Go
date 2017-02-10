@@ -50,18 +50,13 @@ typedef struct sIntersection
 } Intersection;
 
 /**
- * représente les liaisons d'une intersection racine avec les intersections adjacentes sur le goban
+ * contient toutes les intersections d'une chaîne
  * (la relation entre ces Chaine permet d'établir les chaînes du plateau)
- * racine : la pierre pointée actuellement
- * fh : l'intersection située en haut (s'il n'y a pas de pierre, la valeur est "null")
- * fd : l'intersection située à droite (s'il n'y a pas de pierre, la valeur est "null")
- * fb : l'intersection située en bas (s'il n'y a pas de pierre, la valeur est "null")
- * fg : l'intersection située à gauche (s'il n'y a pas de pierre, la valeur est "null")
- * lesLibertes :
+ * lesInters : tableau des intersections composant la chaîne
  */
 typedef struct sChaine
 {
-	Intersection* racine;
+	Intersection** lesInters;
 	
 } Chaine;
 
@@ -116,12 +111,12 @@ bool interEstVide(Intersection* inter);
  */
 Intersection* getPlacement(int x, int y);
 
-/**
- * Change la valeur "estOccupe" d'une Intersection
- * coord : coordonnées x, y
- * estOccupe : true ou false
- */
-void setEstOccupe(Coord* coord, bool estOccupe);
+//~ /**
+ //~ * Change la valeur "estOccupe" d'une Intersection
+ //~ * coord : coordonnées x, y
+ //~ * estOccupe : true ou false
+ //~ */
+//~ void setEstOccupe(Coord* coord, bool estOccupe);
 
 /**
  * Change la valeur du tour
