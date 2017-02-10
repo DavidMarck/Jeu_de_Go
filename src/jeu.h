@@ -33,6 +33,8 @@ typedef struct sCoord
 /**
  * représente une intersection du goban (plateau)
  * position : Coord (x,y)
+ * fh,fd,fb,fg : intersections respectivement en haut, à droite, en bas et à gauche de l'intersection "courante"
+ * lesLibertes : tableau contenant les intersections représentant les libertés de l'intersection "courante"
  * estOccupe : si une pierre est posée sur l'intersection ou non
  * couleur : couleur de la pierre si l'intersection est occupée
  */ 
@@ -43,7 +45,7 @@ typedef struct sIntersection
 	struct sIntersection* fd;
 	struct sIntersection* fb;
 	struct sIntersection* fg;	
-	struct sIntersection* lesLibertes;
+	struct sIntersection** lesLibertes;
 	bool estOccupe;
 	Pierre couleur;
 	
