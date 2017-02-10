@@ -73,9 +73,8 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
 	Intersection* inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
-	int estVide = interEstVide(inter); // on test la valeur de retour de getPlacement(), si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
-	int estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
-	if(estVide == false && estOccupe == false) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
+	printf("nbLibertés : %d\n",inter->nbLibertes);
+	if(coupEstPermis(inter)) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
 		//setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
@@ -132,6 +131,19 @@ Intersection* getPlacement(int x, int y)
 		}
 	}
 	return inter;
+}
+
+bool coupEstPermis(Intersection* inter)
+{
+	bool estVide = interEstVide(inter); // si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
+	bool estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
+	int nbLibertes = inter->nbLibertes;
+	
+	if(estVide == false && estOccupe == false && nbLibertes > 0) // si l'intersection n'est pas vide, ni occupée, qu'elle a des libertés et qu'il ne s'agit pas d'une capture...
+	{
+		return true;
+	}
+	return false;
 }
 
 //~ void setEstOccupe(Coord* coord, bool estOccupe)
@@ -303,6 +315,7 @@ Coord* nouvCoord(int x, int y)
 Intersection*  nouvIntersection(Coord* coord)
 {
 	Intersection* inter = malloc(sizeof(Intersection));
+	
 	inter->position = coord;
 	inter->estOccupe = false;
 	
@@ -342,6 +355,30 @@ Intersection** creerTableInter()
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			lesInters[i * dims_plateau + j] = nouvIntersection(nouvCoord(posX, posY)); // ... et on les stocke dans le tableau
+			
+			if(i == 0)
+			{
+				if(j == 0 || j == dims_plateau - 1)
+				{
+					lesInters[i * dims_plateau + j]->nbLibertes = 2;
+				}
+				else
+				{
+					lesInters[i * dims_plateau + j]->nbLibertes = 3;
+				}
+			}
+			else if(i == dims_plateau - 1)
+			{
+				if(j == 0 || j == dims_plateau - 1)
+				{
+					lesInters[i * dims_plateau + j]->nbLibertes = 2;
+				}
+				else
+				{
+					lesInters[i * dims_plateau + j]->nbLibertes = 3;
+				}
+			}
+			
 			posX += getCoteCase(); // prochaine postion en x à traiter
 		}
 		posX = MARGE_FEN;

@@ -113,6 +113,11 @@ bool interEstVide(Intersection* inter);
  */
 Intersection* getPlacement(int x, int y);
 
+/**
+ * Indique si il est permis de jouer sur cette intersection ou non
+ */
+bool coupEstPermis(Intersection* inter);
+
 //~ /**
  //~ * Change la valeur "estOccupe" d'une Intersection
  //~ * coord : coordonnées x, y
