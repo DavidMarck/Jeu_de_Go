@@ -73,13 +73,12 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
 	Intersection* inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
-	printf("estCoin : %d\n",estCoin(inter));
-	printf("nbLibertes : %d\n",inter->nbLibertes);
 	if(coupEstPermis(inter)) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
 		//setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
+		
 		inter->couleur = tour;
 		changerTour(); // ... et enfin on passe au tour suivant
 	} 
@@ -356,7 +355,8 @@ Intersection** creerTableInter()
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			lesInters[i * dims_plateau + j] = nouvIntersection(nouvCoord(posX, posY)); // ... et on les stocke dans le tableau
-			setNbLibertes(i,j,lesInters[i * dims_plateau + j]); // on attribue les libertés
+			setTypeIntersection(lesInters[i * dims_plateau + j]); // on attribue le type de l'intersection (bord, coin etc..)
+			setNbLibertes(lesInters[i * dims_plateau + j]); // on attribue les libertés
 			posX += getCoteCase(); // prochaine postion en x à traiter
 		}
 		posX = MARGE_FEN;
@@ -367,90 +367,107 @@ Intersection** creerTableInter()
 
 bool estCoin(Intersection* inter)
 {	
-	// coin haut gauche
-	if((inter->position->posX == MARGE_FEN) && (inter->position->posY == MARGE_FEN))
+	
+	// Si l'intersection est l'un des coins, on retourne vrai
+	if(inter->type == COIN_HG || inter->type == COIN_HD || inter->type == COIN_BG || inter->type == COIN_BD)
 	{
 		return true;
-	}
-	// coin haut droite
-	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == MARGE_FEN))
-	{
-		return true;
-	}
-	// coin bas gauche
-	else if((inter->position->posX == MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
-	{
-		return true;
-	}
-	// coin bas droite
-	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-bool estBordure(Intersection* inter)
-{
-	// s'il ne s'agit pas d'un coin...
-	if(!estCoin(inter))
-	{
-		// ... et qu'on est sur une bordure
-		if((inter->position->posX == MARGE_FEN) || (inter->position->posX == width_win() - MARGE_FEN) || (inter->position->posY == MARGE_FEN) || (inter->position->posY == height_win() - MARGE_FEN))
-		{
-			return true;
-		}
 	}
 	return false;
 }
 
-void setNbLibertes(int i, int j, Intersection* inter)
+bool estBordure(Intersection* inter)
 {
+	
+	// Si l'intersection est l'un des bords, on retourne vrai
+	if (inter->type == BORD_HAUT || inter->type == BORD_DROIT || inter->type == BORD_BAS || inter->type == BORD_GAUCHE)
+	{
+		return true;
+	}
+	return false;
+}
+
+void setNbLibertes(Intersection* inter)
+{
+	// Si l'intersection est un coin, on mets les libertées à 2
 	if(estCoin (inter))
 	{
 		inter->nbLibertes = 2;
 	}
+	
+	// Si l'intersection est un bord, on mets les libertées à 3
 	else if(estBordure(inter))
 	{
 		inter->nbLibertes = 3;
 	}
+	
+	// Sinon, c'est une intersection du milieu donc avec 4 libertés
 	else
 	{
 		inter->nbLibertes = 4;
 	}
-	//~ if(i == 0)
-	//~ {
-		//~ if(j == 0 || j == dims_plateau - 1)
-		//~ {
-			//~ inter->nbLibertes = 2;
-		//~ }
-		//~ else
-		//~ {
-			//~ inter->nbLibertes = 3;
-		//~ }
-	//~ }
-	//~ else if(i == dims_plateau - 1)
-	//~ {
-		//~ if(j == 0 || j == dims_plateau - 1)
-		//~ {
-			//~ inter->nbLibertes = 2;
-		//~ }
-		//~ else
-		//~ {
-			//~ inter->nbLibertes = 3;
-		//~ }
-	//~ }
-	//~ else
-	//~ {
-		//~ if(j == 0)
-		//~ {
-			
-		//~ }
-	//~ }
 }
+
+void setTypeIntersection (Intersection* inter)
+{
+	
+	// coin haut gauche
+	if((inter->position->posX == MARGE_FEN) && (inter->position->posY == MARGE_FEN))
+	{
+		inter->type = COIN_HG;
+	}
+	
+	// coin haut droite
+	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == MARGE_FEN))
+	{
+		inter->type = COIN_HD;
+	}
+	
+	// coin bas gauche
+	else if((inter->position->posX == MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
+	{
+		inter->type = COIN_BG;
+	}
+	
+	// coin bas droite
+	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
+	{
+		inter->type = COIN_BD;
+	}
+	
+	// Bord gauche
+	else if(inter->position->posX == MARGE_FEN)
+	{
+		inter->type = BORD_GAUCHE;	
+	}
+	
+	//  Bord droite
+	else if(inter->position->posX == width_win() - MARGE_FEN)
+	{
+		inter->type = BORD_DROIT;		
+	}
+	 
+	// Bord Haut
+	else if (inter->position->posY == MARGE_FEN)
+	{
+		inter->type = BORD_HAUT;	
+	} 
+	
+	// Bord bas
+	else if(inter->position->posY == height_win() - MARGE_FEN)
+	{
+		inter->type = BORD_BAS;
+	}
+	else 
+	{
+		inter->type = DEFAUT;	
+	}
+}
+
+//~ void setFils(Intersection* inter)
+//~ {
+	//~ if(inter->position->posX - getCoteCase() >= MARGE_FEN)
+//~ }
 
 void freeAll()
 {
@@ -486,6 +503,7 @@ int main()
 	
 	event_loop_plateau();
 	//event_loop_niveau();
+	printf("lollllllllllllllllllllllllllll");
 	freeAll();
 	return EXIT_SUCCESS;
 }

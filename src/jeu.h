@@ -12,13 +12,25 @@ typedef enum ePierre
     BLANC, NOIR
 } Pierre;
 
-//~ typedef struct sRectangle 
-//~ {
-	//~ float x0;
-	//~ float x1;
-	//~ float y0;
-	//~ float y1;
-//~ } Rectangle;
+/**
+ *  énumération des différents types d'intersections (en fonction de leur position)
+ *  COIN_HG, COIN_HD, COIN_BG, COIN_BD : respectivement les quatres coins du plateau 
+ *	BORD_HAUT, BORD_DROIT, BORD_BAS, BORD_GAUCHE : les quatres bords du plateau
+ *	DEFAUT : les autres intersections
+ */ 
+typedef enum eTypeInter 
+{
+	COIN_HG,
+	COIN_HD,
+	COIN_BG,
+	COIN_BD,
+	BORD_HAUT,
+	BORD_DROIT,
+	BORD_BAS,
+	BORD_GAUCHE,
+	DEFAUT
+} TypeInter;
+
 
 /** 
  * repésente une coordonnée avec position en x et posotion en y
@@ -48,6 +60,7 @@ typedef struct sIntersection
 	int nbLibertes;
 	bool estOccupe;
 	Pierre couleur;
+	TypeInter type;
 	
 } Intersection;
 
@@ -152,7 +165,12 @@ bool estBordure(Intersection* inter);
  * i,j : respectivement ligne et colonne
  * inter : intersection dont l'attribut nbLibertes va être modifié
  */
-void setNbLibertes(int i, int j, Intersection* inter);
+void setNbLibertes(Intersection* inter);
+
+/**
+ * Attribue le type d'intersection lors de la création de chacunes d'elles 
+ */ 
+void setTypeIntersection (Intersection* inter);
 
 /**
  * Libère la globalité des ressources mémoires utilisées
