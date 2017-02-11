@@ -73,7 +73,8 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
 	Intersection* inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
-	printf("nbLibertés : %d\n",inter->nbLibertes);
+	printf("estCoin : %d\n",estCoin(inter));
+	printf("nbLibertes : %d\n",inter->nbLibertes);
 	if(coupEstPermis(inter)) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
@@ -355,36 +356,101 @@ Intersection** creerTableInter()
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			lesInters[i * dims_plateau + j] = nouvIntersection(nouvCoord(posX, posY)); // ... et on les stocke dans le tableau
-			
-			if(i == 0)
-			{
-				if(j == 0 || j == dims_plateau - 1)
-				{
-					lesInters[i * dims_plateau + j]->nbLibertes = 2;
-				}
-				else
-				{
-					lesInters[i * dims_plateau + j]->nbLibertes = 3;
-				}
-			}
-			else if(i == dims_plateau - 1)
-			{
-				if(j == 0 || j == dims_plateau - 1)
-				{
-					lesInters[i * dims_plateau + j]->nbLibertes = 2;
-				}
-				else
-				{
-					lesInters[i * dims_plateau + j]->nbLibertes = 3;
-				}
-			}
-			
+			setNbLibertes(i,j,lesInters[i * dims_plateau + j]);		
 			posX += getCoteCase(); // prochaine postion en x à traiter
 		}
 		posX = MARGE_FEN;
 		posY += saut; // prochaine postion en y à traiter
 	}
 	return lesInters;
+}
+
+bool estCoin(Intersection* inter)
+{	
+	if((inter->position->posX == MARGE_FEN) && (inter->position->posY == MARGE_FEN))
+	{
+		return true;
+	}
+	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == MARGE_FEN))
+	{
+		return true;
+	}
+	else if((inter->position->posX == MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
+	{
+		return true;
+	}
+	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool estBordure(Intersection* inter)
+{
+	if(!estCoin(inter))
+	{
+		if((inter->position->posX == MARGE_FEN) || (inter->position->posX == width_win() - MARGE_FEN) || (inter->position->posY == MARGE_FEN) || (inter->position->posY == height_win() - MARGE_FEN))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void setNbLibertes(int i, int j, Intersection* inter)
+{
+	if(estCoin (inter))
+	{
+		inter->nbLibertes = 2;
+	}
+	else if(estBordure(inter))
+	{
+		inter->nbLibertes = 3;
+	}
+	else
+	{
+		inter->nbLibertes = 4;
+	}
+	//~ if(i == 0)
+	//~ {
+		//~ if(j == 0 || j == dims_plateau - 1)
+		//~ {
+			//~ inter->nbLibertes = 2;
+		//~ }
+		//~ else
+		//~ {
+			//~ inter->nbLibertes = 3;
+		//~ }
+	//~ }
+	//~ else if(i == dims_plateau - 1)
+	//~ {
+		//~ if(j == 0 || j == dims_plateau - 1)
+		//~ {
+			//~ inter->nbLibertes = 2;
+		//~ }
+		//~ else
+		//~ {
+			//~ inter->nbLibertes = 3;
+		//~ }
+	//~ }
+	//~ else
+	//~ {
+		//~ if(j == 0)
+		//~ {
+			
+		//~ }
+	//~ }
 }
 
 void freeAll()

@@ -136,6 +136,25 @@ void changerTour();
 float getRayonPierre();
 
 /**
+ * Vérifie s'il s'agit d'un coin ou non
+ * inter : intersection à tester
+ */
+bool estCoin(Intersection* inter);
+
+/**
+ * Vérifie s'il s'agit d'une intersection en bordure du goban (hors coins)
+ * inter : intersection à tester
+ */
+bool estBordure(Intersection* inter);
+
+/**
+ * Attribue le nombre de libertés à la création des intersections
+ * i,j : respectivement ligne et colonne
+ * inter : intersection dont l'attribut nbLibertes va être modifié
+ */
+void setNbLibertes(int i, int j, Intersection* inter);
+
+/**
  * Libère la globalité des ressources mémoires utilisées
  */
 void freeAll();
