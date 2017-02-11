@@ -344,8 +344,8 @@ bool interEstVide(Intersection* inter)
 
 Intersection** creerTableInter() 
 { 
-	int posX = MARGE_FEN; // positionnement en x
-	int posY = MARGE_FEN; // positionnement en y
+	float posX = MARGE_FEN; // positionnement en x
+	float posY = MARGE_FEN; // positionnement en y
 	float saut = getCoteCase(); // distance à parcourir en deux intersections
 	
 	Intersection** lesInters = malloc(dims_plateau*dims_plateau*sizeof(Intersection*));
@@ -356,7 +356,7 @@ Intersection** creerTableInter()
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			lesInters[i * dims_plateau + j] = nouvIntersection(nouvCoord(posX, posY)); // ... et on les stocke dans le tableau
-			setNbLibertes(i,j,lesInters[i * dims_plateau + j]);		
+			setNbLibertes(i,j,lesInters[i * dims_plateau + j]); // on attribue les libertés
 			posX += getCoteCase(); // prochaine postion en x à traiter
 		}
 		posX = MARGE_FEN;
@@ -367,18 +367,22 @@ Intersection** creerTableInter()
 
 bool estCoin(Intersection* inter)
 {	
+	// coin haut gauche
 	if((inter->position->posX == MARGE_FEN) && (inter->position->posY == MARGE_FEN))
 	{
 		return true;
 	}
+	// coin haut droite
 	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == MARGE_FEN))
 	{
 		return true;
 	}
+	// coin bas gauche
 	else if((inter->position->posX == MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
 	{
 		return true;
 	}
+	// coin bas droite
 	else if((inter->position->posX == width_win() - MARGE_FEN) && (inter->position->posY == height_win() - MARGE_FEN))
 	{
 		return true;
@@ -391,21 +395,16 @@ bool estCoin(Intersection* inter)
 
 bool estBordure(Intersection* inter)
 {
+	// s'il ne s'agit pas d'un coin...
 	if(!estCoin(inter))
 	{
+		// ... et qu'on est sur une bordure
 		if((inter->position->posX == MARGE_FEN) || (inter->position->posX == width_win() - MARGE_FEN) || (inter->position->posY == MARGE_FEN) || (inter->position->posY == height_win() - MARGE_FEN))
 		{
 			return true;
 		}
-		else
-		{
-			return false;
-		}
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void setNbLibertes(int i, int j, Intersection* inter)
