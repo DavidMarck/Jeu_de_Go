@@ -562,7 +562,10 @@ void printChaines()
 
 void checkLesAdjacents(Intersection* inter)
 {
-	if (getIntersectionHaut(inter)->estOccupe == true || getIntersectionDroite(inter)->estOccupe == true || getIntersectionBas(inter)->estOccupe == true || getIntersectionGauche(inter)->estOccupe == true)
+	if ((getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
+		|| (getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
+		|| (getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
+		|| (getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true))
 	{
 		
 		if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
