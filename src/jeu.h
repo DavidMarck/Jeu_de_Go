@@ -171,6 +171,11 @@ void initChaine(Intersection* inter);
 bool coupEstPermis(Intersection* inter);
 
 /**
+ * actualise le nombre de libertés des intersections du plateau
+ */
+void updateNbLibertes();
+
+/**
  * Change la valeur du tour
  */
 void changerTour();

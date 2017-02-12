@@ -75,20 +75,35 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
 		inter->couleur = tour;
 		checkLesAdjacents(inter);
+		updateNbLibertes();
 		printChaines();
 		changerTour(); // ... et enfin on passe au tour suivant
-	} 
-	
+	}
 }
 
-//~ void updateLibertes(Intersection* interPierrePosee) 
-//~ {
-	//~ if (estCoin(int
-	//~ switch (interPierrePosee->type)
-	//~ {
-		//~ case CO
-	//~ }
-//~ }
+void updateNbLibertes() 
+{
+	for (int i = 0; i < dims_plateau; i++) 
+	{
+		for (int j = 0; j < dims_plateau; j++)
+		{
+			int nbAdjacents = getNbAdjacents(lesInters[i * dims_plateau + j]);
+			Intersection** lesAdjacents = getLesAdjacents(lesInters[i * dims_plateau + j],nbAdjacents);
+			
+			for(int k = 0; k < nbAdjacents; k++)
+			{
+				if(lesAdjacents[k]->estOccupe == true)
+				{
+					printf("%d\n",lesInters[i * dims_plateau + j]->nbLibertes);
+					lesInters[i * dims_plateau + j]->nbLibertes--;
+					printf("%d\n",lesInters[i * dims_plateau + j]->nbLibertes);
+				}
+			}
+			
+			free(lesAdjacents);
+		}
+	}
+}
 
 void changerTour()
 {
