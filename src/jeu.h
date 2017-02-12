@@ -221,12 +221,16 @@ void checkLesAdjacents(Intersection* inter);
  /**
   * 
   */
- Intersection** getLesAdjacents(Intersection* inter);
+ Intersection** getLesAdjacents(Intersection* inter, int taille);
  
  /**
   * 
   */
  int getNbAdjacents(Intersection* inter);
+
+/**
+ */
+ bool aAdjacentOccupe(Intersection* inter);
 
 /**
  * 

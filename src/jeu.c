@@ -611,52 +611,28 @@ bool estNouvChaine(Intersection* inter)
 {
 	CouleurPierre couleurTest = inter->couleur; // couleur à vérifier
 	int cptCoulDiff = 0;
-	int nbAdjacents = 0;
 	
-	if ((getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
-		|| (getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
-		|| (getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
-		|| (getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true))
+	if (aAdjacentOccupe(inter) == true)
 	{
-		if(getIntersectionHaut(inter))
+		int nbAdjacents = getNbAdjacents(inter);
+		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+		
+		for(int i = 0; i < nbAdjacents; i++)
 		{
-			nbAdjacents++;
-			if(getIntersectionHaut(inter)->couleur != couleurTest)
+			if(lesAdjacents[i]->couleur != couleurTest)
 			{
 				cptCoulDiff++;
 			}
 		}
-		if(getIntersectionDroite(inter))
+		
+		free(lesAdjacents);
+		
+		if(cptCoulDiff == nbAdjacents)
 		{
-			nbAdjacents++;
-			if(getIntersectionDroite(inter)->couleur != couleurTest)
-			{
-				cptCoulDiff++;
-			}
-		}
-		if(getIntersectionBas(inter))
-		{
-			nbAdjacents++;
-			if(getIntersectionBas(inter)->couleur != couleurTest)
-			{
-				cptCoulDiff++;
-			}
-		}
-		if(getIntersectionGauche(inter))
-		{
-			nbAdjacents++;
-			if(getIntersectionGauche(inter)->couleur != couleurTest)
-			{
-				cptCoulDiff++;
-			}
+			return true;
 		}
 	}
 	else
-	{
-		return true;
-	}
-	
-	if(cptCoulDiff == nbAdjacents)
 	{
 		return true;
 	}
@@ -664,22 +640,9 @@ bool estNouvChaine(Intersection* inter)
 	return false;
 }
 
-Intersection** getLesAdjacents(Intersection* inter)
+Intersection** getLesAdjacents(Intersection* inter, int taille)
 {
-	Intersection** lesAdjacents = NULL;
-	
-	if(estCoin(inter))
-	{
-		lesAdjacents = malloc(2*sizeof(Intersection*));
-	}
-	else if(estBordure(inter))
-	{
-		lesAdjacents = malloc(3*sizeof(Intersection*));
-	}
-	else
-	{
-		lesAdjacents = malloc(4*sizeof(Intersection*));
-	}
+	Intersection** lesAdjacents = malloc(taille*sizeof(Intersection*));
 	
 	int i = 0;
 	
@@ -721,6 +684,25 @@ int getNbAdjacents(Intersection* inter)
 	{
 		return 4;
 	}
+}
+
+bool aAdjacentOccupe(Intersection* inter)
+{
+	bool aAdjacentOccupe = false;
+	
+	int nbAdjacents = getNbAdjacents(inter);
+	Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+	
+	for(int i = 0; i < nbAdjacents; i++)
+	{
+		if(lesAdjacents[i]->estOccupe == true)
+		{
+			aAdjacentOccupe = true;
+		}
+	}
+	
+	free(lesAdjacents);
+	return aAdjacentOccupe;
 }
 
 void freeAll()
