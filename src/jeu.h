@@ -7,11 +7,11 @@
 /** 
  * énumération des couleurs de pierre
  */
-typedef enum ePierre
+typedef enum eCouleurPierre
 {
     BLANC = 1,
     NOIR = 2
-} Pierre;
+} CouleurPierre;
 
 /**
  *  énumération des différents types d'intersections (en fonction de leur position)
@@ -57,7 +57,7 @@ typedef struct sIntersection
 	Coord* position;	
 	int nbLibertes;
 	bool estOccupe;
-	Pierre couleur;
+	CouleurPierre couleur;
 	TypeInter type;
 	struct sIntersection* suiteChaine;
 	struct sChaine* chMere;
@@ -212,6 +212,21 @@ void setFils(Intersection* inter);
  * 
  */
 void checkLesAdjacents(Intersection* inter);
+
+/**
+ * 
+ */
+ bool estNouvChaine(Intersection* inter);
+ 
+ /**
+  * 
+  */
+ Intersection** getLesAdjacents(Intersection* inter);
+ 
+ /**
+  * 
+  */
+ int getNbAdjacents(Intersection* inter);
 
 /**
  * 

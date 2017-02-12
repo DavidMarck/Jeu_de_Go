@@ -16,7 +16,7 @@ static int dims_plateau; // dimensions du plateau choisies (19, 13 ou 9)
 static Intersection** lesInters; // tableau de structures contenant les intersections du goban (plateau)
 static Chaine** lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
 static int nbChaines = 0;
-static Pierre tour = NOIR;  // indique le tour actuel
+static CouleurPierre tour = NOIR;  // indique le tour actuel
 
 /**
  * Mettre ici son code pour dessiner dans la fenetre (plateau)
@@ -74,7 +74,6 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
 	Intersection* inter = getIntersection(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
-	
 	//~ printf("Haut = %p\tDroite = %p\tBas = %p\tGauche = %p\n", getIntersectionHaut(inter), getIntersectionDroite(inter), getIntersectionBas(inter), getIntersectionGauche(inter));
 	
 	if(coupEstPermis(inter)) // Si le coup est permis
@@ -562,10 +561,7 @@ void printChaines()
 
 void checkLesAdjacents(Intersection* inter)
 {
-	if ((getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
-		|| (getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
-		|| (getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
-		|| (getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true))
+	if (estNouvChaine(inter) == false)
 	{
 		
 		if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
@@ -608,6 +604,122 @@ void checkLesAdjacents(Intersection* inter)
 	{
 		printf("Intersection initialisée \n");
 		initChaine(inter);
+	}
+}
+
+bool estNouvChaine(Intersection* inter)
+{
+	CouleurPierre couleurTest = inter->couleur; // couleur à vérifier
+	int cptCoulDiff = 0;
+	int nbAdjacents = 0;
+	
+	if ((getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
+		|| (getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
+		|| (getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
+		|| (getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true))
+	{
+		if(getIntersectionHaut(inter))
+		{
+			nbAdjacents++;
+			if(getIntersectionHaut(inter)->couleur != couleurTest)
+			{
+				cptCoulDiff++;
+			}
+		}
+		if(getIntersectionDroite(inter))
+		{
+			nbAdjacents++;
+			if(getIntersectionDroite(inter)->couleur != couleurTest)
+			{
+				cptCoulDiff++;
+			}
+		}
+		if(getIntersectionBas(inter))
+		{
+			nbAdjacents++;
+			if(getIntersectionBas(inter)->couleur != couleurTest)
+			{
+				cptCoulDiff++;
+			}
+		}
+		if(getIntersectionGauche(inter))
+		{
+			nbAdjacents++;
+			if(getIntersectionGauche(inter)->couleur != couleurTest)
+			{
+				cptCoulDiff++;
+			}
+		}
+	}
+	else
+	{
+		return true;
+	}
+	
+	if(cptCoulDiff == nbAdjacents)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
+Intersection** getLesAdjacents(Intersection* inter)
+{
+	Intersection** lesAdjacents = NULL;
+	
+	if(estCoin(inter))
+	{
+		lesAdjacents = malloc(2*sizeof(Intersection*));
+	}
+	else if(estBordure(inter))
+	{
+		lesAdjacents = malloc(3*sizeof(Intersection*));
+	}
+	else
+	{
+		lesAdjacents = malloc(4*sizeof(Intersection*));
+	}
+	
+	int i = 0;
+	
+	if(getIntersectionHaut(inter))
+	{
+		lesAdjacents[i] = getIntersectionHaut(inter);
+		i++;
+	}
+	if(getIntersectionDroite(inter))
+	{
+		lesAdjacents[i] = getIntersectionDroite(inter);
+		i++;
+	}
+	if(getIntersectionBas(inter))
+	{
+		lesAdjacents[i] = getIntersectionBas(inter);
+		i++;
+	}
+	if(getIntersectionGauche(inter))
+	{
+		lesAdjacents[i] = getIntersectionGauche(inter);
+		i++;
+	}
+	
+	return lesAdjacents;
+}
+
+int getNbAdjacents(Intersection* inter)
+{
+	if(estCoin(inter))
+	{
+		return 2;
+	}
+	else if(estBordure(inter))
+	{
+		return 3;
+	}
+	else
+	{
+		return 4;
 	}
 }
 
