@@ -15,6 +15,7 @@ const int MARGE_FEN = 25;
 static int dims_plateau; // dimensions du plateau choisies (19, 13 ou 9)
 static Intersection** lesInters; // tableau de structures contenant les intersections du goban (plateau)
 static Chaine* lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
+static int nbChaines = 0;
 static Pierre tour = NOIR;  // indique le tour actuel
 
 /**
@@ -72,18 +73,28 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 {
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
-	Intersection* inter = getPlacement(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
+	Intersection* inter = getIntersection(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
+	
+	printf("Haut = %p\tDroite = %p\tBas = %p\tGauche = %p\n", getIntersectionHaut(inter), getIntersectionDroite(inter), getIntersectionBas(inter), getIntersectionGauche(inter));
+	
 	if(coupEstPermis(inter)) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
-		//setEstOccupe(nouvCoord(inter->position->posX,inter->position->posY), true); // ... on définit que l'intersection est maintement occupée...
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
-		
 		inter->couleur = tour;
 		changerTour(); // ... et enfin on passe au tour suivant
 	} 
 	
 }
+
+//~ void updateLibertes(Intersection* interPierrePosee) 
+//~ {
+	//~ if (estCoin(int
+	//~ switch (interPierrePosee->type)
+	//~ {
+		//~ case CO
+	//~ }
+//~ }
 
 void changerTour()
 {
@@ -104,7 +115,7 @@ void changerTour()
 	}
 }
 
-Intersection* getPlacement(int x, int y) 
+Intersection* getIntersection(int x, int y) 
 {
 	Intersection* inter = initInterVide(); // on initialise une Intersection quelconque ("vide")
 	
@@ -146,21 +157,6 @@ bool coupEstPermis(Intersection* inter)
 	return false;
 }
 
-//~ void setEstOccupe(Coord* coord, bool estOccupe)
-//~ {
-	//~ // on parcourt l'ensemble des intersections du plateau ...
-	//~ for (int i = 0; i < dims_plateau; i++) 
-	//~ {
-		//~ for (int j = 0; j < dims_plateau; j++)
-		//~ {
-			//~ // si les coord. fournies correspondent aux coordonnées de l'intersection...
-			//~ if((lesInters[i * dims_plateau + j]->position->posX == coord->posX) && (lesInters[i * dims_plateau + j]->position->posY == coord->posY))
-			//~ {
-				//~ lesInters[i * dims_plateau + j]->estOccupe = estOccupe; // ... on la définit comme étant occupée
-			//~ }
-		//~ }
-	//~ }
-//~ }
 
 /**
  * on a cliqué a la souris (choix du niveau):
@@ -362,6 +358,14 @@ Intersection** creerTableInter()
 		posX = MARGE_FEN;
 		posY += saut; // prochaine postion en y à traiter
 	}
+	
+	//~ for (int i = 0; i < dims_plateau; i++) 
+	//~ {
+		//~ for (int j = 0; j < dims_plateau; j++)
+		//~ {
+			//~ setFils(lesInters[i * dims_plateau + j]);  // On définit les intersections adjacentes (les fils)
+		//~ }
+	//~ }
 	return lesInters;
 }
 
@@ -464,9 +468,64 @@ void setTypeIntersection (Intersection* inter)
 	}
 }
 
-//~ void setFils(Intersection* inter)
+Intersection* getIntersectionHaut(Intersection* inter)
+{
+	// Si l'intersection ne fait pas partie de la bordure ou des coins du haut, on retourne l'intersection du haut..
+	if(inter->type != BORD_HAUT && inter->type != COIN_HG && inter->type != COIN_HD)
+	{
+		return getIntersection(inter->position->posX, inter->position->posY - getCoteCase());
+	}
+	//..sinon on retourne une valeure nulle
+	return NULL;
+}
+
+Intersection* getIntersectionDroite(Intersection* inter)
+{
+	// Si l'intersection ne fait pas partie de la bordure ou des coins de la droite, on retourne l'intersection de la droite..
+	if(inter->type != BORD_DROIT && inter->type != COIN_HD && inter->type != COIN_BD)
+	{
+		return getIntersection(inter->position->posX + getCoteCase(), inter->position->posY);
+	}
+	//..sinon on retourne une valeure nulle
+	return NULL;
+}
+
+Intersection* getIntersectionBas(Intersection* inter)
+{
+	// Si l'intersection ne fait pas partie de la bordure ou des coins du bas, on retourne l'intersection du bas..
+	if(inter->type != BORD_BAS && inter->type != COIN_BG && inter->type != COIN_BD)
+	{
+		return getIntersection(inter->position->posX, inter->position->posY + getCoteCase());
+	}
+	//..sinon on retourne une valeure nulle
+	return NULL;
+}
+
+Intersection* getIntersectionGauche(Intersection* inter)
+{
+	// Si l'intersection ne fait pas partie de la bordure ou des coins de la gauche, on retourne l'intersection de la gauche..
+	if(inter->type != BORD_GAUCHE && inter->type != COIN_HG && inter->type != COIN_BG)
+	{
+		return getIntersection(inter->position->posX - getCoteCase(), inter->position->posY);
+	}
+	//..sinon on retourne une valeure nulle
+	return NULL;
+}
+
+//~ void initChaine(Intersection* inter)
 //~ {
-	//~ if(inter->position->posX - getCoteCase() >= MARGE_FEN)
+	//~ Chaine* c = malloc(sizeof(Chaine));
+	//~ lesChaines[nbChaines] = c;
+	//~ nbChaines++;
+	//~ c->debutChaine = inter;
+//~ }
+
+//~ void printChaines() 
+//~ {
+	//~ for(int i = 0; i < nbChaines; i++) 
+	//~ {
+		//~ printf("%p\n"lesChaines[i]);
+	//~ }
 //~ }
 
 void freeAll()
@@ -483,6 +542,7 @@ void freeAll()
 	
 	free(lesInters);
 }
+
 
 ///////////////////////////////
 // PARTIE GESTION DES REGLES //

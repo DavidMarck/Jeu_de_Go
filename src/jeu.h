@@ -45,23 +45,20 @@ typedef struct sCoord
 /**
  * représente une intersection du goban (plateau)
  * position : Coord (x,y)
- * fh,fd,fb,fg : intersections respectivement en haut, à droite, en bas et à gauche de l'intersection "courante" (fils)
  * nbLibertes : nombre de libertes de l'intersection
  * estOccupe : si une pierre est posée sur l'intersection ou non
  * couleur : couleur de la pierre si l'intersection est occupée
+ * type : Correspond au type d'emplacement de l'intersection (ex : coin haut)
+ * suiteChaine : Intersection suivante dans la chaine
  */ 
 typedef struct sIntersection
 {
-	Coord* position;
-	struct sIntersection* fh;
-	struct sIntersection* fd;
-	struct sIntersection* fb;
-	struct sIntersection* fg;	
+	Coord* position;	
 	int nbLibertes;
 	bool estOccupe;
 	Pierre couleur;
 	TypeInter type;
-	
+	struct sIntersection* suiteChaine;
 } Intersection;
 
 /**
@@ -71,8 +68,8 @@ typedef struct sIntersection
  */
 typedef struct sChaine
 {
-	Intersection** lesInters;
-	
+	int nbPierres;
+	Intersection* debutChaine;
 } Chaine;
 
 
@@ -124,7 +121,32 @@ bool interEstVide(Intersection* inter);
  * Retourne l'intersection sur laquelle le joueur a cliqué
  * x,y : coordonnées x et y (du clic)
  */
-Intersection* getPlacement(int x, int y);
+Intersection* getIntersection(int x, int y);
+
+/**
+ * retourne, si elle existe, l'intersection située en haut de celle en entrée
+ * inter : L'intersection dont on souhaite obtenir celle située au-dessus
+ */
+Intersection* getIntersectionHaut(Intersection* inter);
+
+/**
+ * retourne, si elle existe, l'intersection située à droite de celle en entrée
+ * inter : L'intersection dont on souhaite obtenir celle située à droite
+ */
+Intersection* getIntersectionDroite(Intersection* inter);
+
+/**
+ * retourne, si elle existe, l'intersection située en bas de celle en entrée
+ * inter : L'intersection dont on souhaite obtenir celle située au-dessous
+ */
+Intersection* getIntersectionBas(Intersection* inter);
+
+/**
+ * retourne, si elle existe, l'intersection située à gauche de celle en entrée
+ * inter : L'intersection dont on souhaite obtenir celle située à gauche
+ */
+Intersection* getIntersectionGauche(Intersection* inter);
+
 
 /**
  * Indique si il est permis de jouer sur cette intersection ou non
@@ -171,6 +193,11 @@ void setNbLibertes(Intersection* inter);
  * Attribue le type d'intersection lors de la création de chacunes d'elles 
  */ 
 void setTypeIntersection (Intersection* inter);
+
+/**
+ * 
+ */
+void setFils(Intersection* inter);
 
 /**
  * Libère la globalité des ressources mémoires utilisées
