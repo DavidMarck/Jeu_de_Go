@@ -240,6 +240,12 @@ void checkLesAdjacents(Intersection* inter);
 void printChaines();
 
 /**
+ * Retourne le nombre total des libertés d'une chaîne
+ * chaine : la chaîne dont on souhaite connaître le nombre de libertés
+ */
+int getNbLibertesChaine(Chaine* chaine);
+
+/**
  * Supprime une chaîne de lesChaînes
  */
  void supprimeChaine(Chaine* chaine);

@@ -68,14 +68,12 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 	
 	Intersection* inter = getIntersection(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
-	//~ printf("Haut = %p\tDroite = %p\tBas = %p\tGauche = %p\n", getIntersectionHaut(inter), getIntersectionDroite(inter), getIntersectionBas(inter), getIntersectionGauche(inter));
 	
 	if(coupEstPermis(inter)) // Si le coup est permis
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
 		inter->couleur = tour;
-		//~ printf("même couleur ? : %d\n", estMemeCouleur(inter, getIntersectionGauche(inter)));
 		checkLesAdjacents(inter);
 		printChaines();
 		changerTour(); // ... et enfin on passe au tour suivant
@@ -557,7 +555,7 @@ void printChaines()
 {
 	for(int i = 0; i < nbChaines; i++)
 	{
-		printf("%p\n", lesChaines[i]);
+		printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));
 	}
 }
 
@@ -699,6 +697,20 @@ bool aAdjacentOccupe(Intersection* inter)
 	
 	free(lesAdjacents);  //On libère la mémoire
 	return aAdjacentOccupe;
+}
+
+int getNbLibertesChaine(Chaine* chaine)
+{
+	int nbTotLibertes = 0;
+	Intersection* inter = chaine->debutChaine;
+	
+	do
+	{
+		nbTotLibertes += inter->nbLibertes;
+		inter = inter->suiteChaine;
+	} while (inter);
+	
+	return nbTotLibertes;
 }
 
 void supprimeChaine(Chaine* chaine)
