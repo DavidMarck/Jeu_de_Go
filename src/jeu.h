@@ -206,29 +206,30 @@ void setTypeIntersection (Intersection* inter);
 /**
  * 
  */
-void setFils(Intersection* inter);
-
-/**
- * 
- */
 void checkLesAdjacents(Intersection* inter);
 
 /**
- * 
+ * Vérifie à la pose d'une pierre si une nouvelle chaîne va être créée ou non
+ * inter : l'intersection sur laquelle on pose une pierre
  */
  bool estNouvChaine(Intersection* inter);
  
  /**
-  * 
+  * Retourne un tableau contenant les intersections adjacentes
+  * inter : intersection dont on retounre les adjacentes
+  * taille : taille du tabelau retourné (pour l'allocation)
   */
  Intersection** getLesAdjacents(Intersection* inter, int taille);
  
  /**
-  * 
+  * Retourne le nombre d'intersections adjacentes
+  * inter : intersection dont on veut connaître le nombre d'adjacences
   */
  int getNbAdjacents(Intersection* inter);
 
 /**
+ * Détermine si au moins une intersection adjacente est occupée par une pierre
+ * inter : intersection à verfier
  */
  bool aAdjacentOccupe(Intersection* inter);
 
