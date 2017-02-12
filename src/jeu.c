@@ -735,11 +735,18 @@ void freeAll()
 		for (int j = 0; j < dims_plateau; j++)
 		{
 			free(lesInters[i * dims_plateau + j]->position);
+			free(lesInters[i * dims_plateau + j]->suiteChaine);
+			free(lesInters[i * dims_plateau + j]->chMere);
 			free(lesInters[i * dims_plateau + j]);
+			
+			free(lesChaines[i * dims_plateau + j]->debutChaine);
+			free(lesChaines[i * dims_plateau + j]->finChaine);
+			free(lesChaines[i * dims_plateau + j]);
 		}
 	}
 	
 	free(lesInters);
+	free(lesChaines);
 }
 
 
