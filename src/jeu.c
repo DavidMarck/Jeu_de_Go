@@ -14,7 +14,7 @@ const int MARGE_FEN = 25;
 
 static int dims_plateau; // dimensions du plateau choisies (19, 13 ou 9)
 static Intersection** lesInters; // tableau de structures contenant les intersections du goban (plateau)
-static Chaine* lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
+static Chaine** lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
 static int nbChaines = 0;
 static Pierre tour = NOIR;  // indique le tour actuel
 
@@ -75,13 +75,16 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	
 	Intersection* inter = getIntersection(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
 	
-	printf("Haut = %p\tDroite = %p\tBas = %p\tGauche = %p\n", getIntersectionHaut(inter), getIntersectionDroite(inter), getIntersectionBas(inter), getIntersectionGauche(inter));
+	//~ printf("Haut = %p\tDroite = %p\tBas = %p\tGauche = %p\n", getIntersectionHaut(inter), getIntersectionDroite(inter), getIntersectionBas(inter), getIntersectionGauche(inter));
 	
-	if(coupEstPermis(inter)) // si on a récupéré une des intersections du plateau ET si celle-ci est inoccupée...
+	if(coupEstPermis(inter)) // Si le coup est permis
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
 		inter->couleur = tour;
+		//~ printf("même couleur ? : %d\n", estMemeCouleur(inter, getIntersectionGauche(inter)));
+		checkLesAdjacents(inter);
+		printChaines();
 		changerTour(); // ... et enfin on passe au tour suivant
 	} 
 	
@@ -470,63 +473,140 @@ void setTypeIntersection (Intersection* inter)
 
 Intersection* getIntersectionHaut(Intersection* inter)
 {
+	Intersection* interTest = NULL;
 	// Si l'intersection ne fait pas partie de la bordure ou des coins du haut, on retourne l'intersection du haut..
 	if(inter->type != BORD_HAUT && inter->type != COIN_HG && inter->type != COIN_HD)
 	{
 		return getIntersection(inter->position->posX, inter->position->posY - getCoteCase());
 	}
 	//..sinon on retourne une valeure nulle
-	return NULL;
+	return interTest;
 }
 
 Intersection* getIntersectionDroite(Intersection* inter)
 {
+	Intersection* interTest = NULL;
 	// Si l'intersection ne fait pas partie de la bordure ou des coins de la droite, on retourne l'intersection de la droite..
 	if(inter->type != BORD_DROIT && inter->type != COIN_HD && inter->type != COIN_BD)
 	{
 		return getIntersection(inter->position->posX + getCoteCase(), inter->position->posY);
 	}
 	//..sinon on retourne une valeure nulle
-	return NULL;
+	return interTest;
 }
 
 Intersection* getIntersectionBas(Intersection* inter)
 {
+	Intersection* interTest = NULL;
 	// Si l'intersection ne fait pas partie de la bordure ou des coins du bas, on retourne l'intersection du bas..
 	if(inter->type != BORD_BAS && inter->type != COIN_BG && inter->type != COIN_BD)
 	{
 		return getIntersection(inter->position->posX, inter->position->posY + getCoteCase());
 	}
 	//..sinon on retourne une valeure nulle
-	return NULL;
+	return interTest;
 }
 
 Intersection* getIntersectionGauche(Intersection* inter)
 {
+	Intersection* interTest = NULL;
 	// Si l'intersection ne fait pas partie de la bordure ou des coins de la gauche, on retourne l'intersection de la gauche..
 	if(inter->type != BORD_GAUCHE && inter->type != COIN_HG && inter->type != COIN_BG)
 	{
 		return getIntersection(inter->position->posX - getCoteCase(), inter->position->posY);
 	}
 	//..sinon on retourne une valeure nulle
-	return NULL;
+	return interTest;
 }
 
-//~ void initChaine(Intersection* inter)
-//~ {
-	//~ Chaine* c = malloc(sizeof(Chaine));
-	//~ lesChaines[nbChaines] = c;
-	//~ nbChaines++;
-	//~ c->debutChaine = inter;
-//~ }
+void incrementChaine(Chaine* chaine, Intersection* pierre)
+{
+	pierre->suiteChaine = NULL;
+	chaine->finChaine->suiteChaine = pierre;
+	chaine->finChaine = pierre;
+	chaine->nbPierres++;
+	printf("chaine incrémentée");
+}
 
-//~ void printChaines() 
-//~ {
-	//~ for(int i = 0; i < nbChaines; i++) 
-	//~ {
-		//~ printf("%p\n"lesChaines[i]);
-	//~ }
-//~ }
+bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
+{
+	if(inter1->couleur && inter2->couleur)
+		{
+		if(inter1->couleur == inter2->couleur)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void initChaine(Intersection* inter)
+{
+	Chaine* c = malloc(sizeof(Chaine));
+	inter->chMere = c;
+	c->debutChaine = inter;
+	c->finChaine = inter;
+	c->nbPierres = 1;
+	lesChaines[nbChaines] = c;
+	nbChaines++;
+}
+
+void printChaines() 
+{
+	for(int i = 0; i < nbChaines; i++)
+	{
+		printf("%p\n", lesChaines[i]);
+	}
+}
+
+void checkLesAdjacents(Intersection* inter)
+{
+	
+	if (getIntersectionHaut(inter)->estOccupe == true || getIntersectionDroite(inter)->estOccupe == true || getIntersectionBas(inter)->estOccupe == true || getIntersectionGauche(inter)->estOccupe == true)
+	{
+		
+		if(getIntersectionHaut(inter))
+		{
+			printf("loooooooooooooooo\n");
+			if(estMemeCouleur(inter, getIntersectionHaut(inter)))
+			{
+				incrementChaine(getIntersectionHaut(inter)->chMere, inter);
+			}
+		}
+		
+		if(getIntersectionDroite(inter))
+		{
+			printf("loooooooooooooooo\n");
+			if(estMemeCouleur(inter, getIntersectionDroite(inter)))
+			{
+				incrementChaine(getIntersectionDroite(inter)->chMere, inter);
+			}
+		}
+		
+		if(getIntersectionBas(inter))
+		{
+			printf("loooooooooooooooo\n");
+			if(estMemeCouleur(inter, getIntersectionBas(inter)))
+			{
+				incrementChaine(getIntersectionBas(inter)->chMere, inter);
+			}
+		}
+		
+		if(getIntersectionGauche(inter))
+		{
+			printf("loooooooooooooooo\n");
+			if(estMemeCouleur(inter, getIntersectionGauche(inter)))
+			{
+				incrementChaine(getIntersectionGauche(inter)->chMere, inter);
+			}
+		}
+	}
+	else 
+	{
+		printf("Intersection initialisée \n");
+		initChaine(inter);
+	}
+}
 
 void freeAll()
 {
@@ -560,7 +640,7 @@ int main()
 	///////////////////////////////////////////////////////////////////
 	scanf("%d", &dims_plateau);
 	lesInters = creerTableInter();
-	
+	lesChaines = malloc(dims_plateau * dims_plateau * sizeof(Chaine*));
 	event_loop_plateau();
 	//event_loop_niveau();
 	printf("lollllllllllllllllllllllllllll");

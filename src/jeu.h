@@ -9,7 +9,8 @@
  */
 typedef enum ePierre
 {
-    BLANC, NOIR
+    BLANC = 1,
+    NOIR = 2
 } Pierre;
 
 /**
@@ -59,17 +60,20 @@ typedef struct sIntersection
 	Pierre couleur;
 	TypeInter type;
 	struct sIntersection* suiteChaine;
+	struct sChaine* chMere;
 } Intersection;
 
 /**
  * contient toutes les intersections d'une chaîne
- * (la relation entre ces Chaine permet d'établir les chaînes du plateau)
- * lesInters : tableau des intersections composant la chaîne
+ * nbPierres : le nombre de pierres dans la chaine
+ * debutChaine : La première intersection de la chaine
+ * finChaine : La dernière intersection de la chaine
  */
 typedef struct sChaine
 {
 	int nbPierres;
 	Intersection* debutChaine;
+	Intersection* finChaine;
 } Chaine;
 
 
@@ -147,18 +151,23 @@ Intersection* getIntersectionBas(Intersection* inter);
  */
 Intersection* getIntersectionGauche(Intersection* inter);
 
+/**
+ * Rattache une pierre à une chaine
+ * chaine : la chaine ciblée par l'ajout
+ * pierre : la pierre à ajouter
+ */
+void incrementChaine(Chaine* chaine, Intersection* pierre);
+
+/**
+ * Initialise une chaine avec une intersection
+ * inter : la première intersection de la chaine
+ */
+void initChaine(Intersection* inter);
 
 /**
  * Indique si il est permis de jouer sur cette intersection ou non
  */
 bool coupEstPermis(Intersection* inter);
-
-//~ /**
- //~ * Change la valeur "estOccupe" d'une Intersection
- //~ * coord : coordonnées x, y
- //~ * estOccupe : true ou false
- //~ */
-//~ void setEstOccupe(Coord* coord, bool estOccupe);
 
 /**
  * Change la valeur du tour
@@ -198,6 +207,16 @@ void setTypeIntersection (Intersection* inter);
  * 
  */
 void setFils(Intersection* inter);
+
+/**
+ * 
+ */
+void checkLesAdjacents(Intersection* inter);
+
+/**
+ * 
+ */
+void printChaines();
 
 /**
  * Libère la globalité des ressources mémoires utilisées
