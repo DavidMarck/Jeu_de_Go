@@ -530,6 +530,7 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 
 bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
 {
+	// Si les deux intersections entrées ont la même couleur, on retourne vrai
 	if(inter1->couleur && inter2->couleur)
 		{
 		if(inter1->couleur == inter2->couleur)
@@ -542,63 +543,65 @@ bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
 
 void initChaine(Intersection* inter)
 {
-	Chaine* c = malloc(sizeof(Chaine));
-	inter->chMere = c;
-	c->debutChaine = inter;
-	c->finChaine = inter;
-	c->nbPierres = 1;
-	lesChaines[nbChaines] = c;
-	nbChaines++;
+	Chaine* c = malloc(sizeof(Chaine));	// on crée une chaine que l'on alloue
+	inter->chMere = c;	// on indique à l'intersection qu'elle appartient à cette chaine
+	c->debutChaine = inter;	// on indique à la chaine que l'intersection est son point de départ..
+	c->finChaine = inter;	//.. et son point de fin
+	c->nbPierres = 1;	// on fixe le nombre de pierres à 1
+	lesChaines[nbChaines] = c;	// On ajoute la nouvelle chaine au tableau des chaines du jeu
+	nbChaines++;	// On incrémente le nombre total de chaine
 }
 
-void printChaines() 
-{
-	for(int i = 0; i < nbChaines; i++)
-	{
-		printf("%p\n", lesChaines[i]);
-	}
-}
+//~ void printChaines() 
+//~ {
+	//~ for(int i = 0; i < nbChaines; i++)
+	//~ {
+		//~ printf("%p\n", lesChaines[i]);
+	//~ }
+//~ }
 
 void checkLesAdjacents(Intersection* inter)
 {
+	// Si une chaine n'est pas à initialiser (car adjacente à une autre de la même couleur)...
 	if (estNouvChaine(inter) == false)
 	{
 		
-		if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
-		{
-			printf("InterHautOccupe\n");
-			if(estMemeCouleur(inter, getIntersectionHaut(inter)))
-			{
-				incrementChaine(getIntersectionHaut(inter)->chMere, inter);
-			}
-		}
 		
-		if(getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
-		{
-			printf("InterDroiteOccupe\n");
-			if(estMemeCouleur(inter, getIntersectionDroite(inter)))
-			{
-				incrementChaine(getIntersectionDroite(inter)->chMere, inter);
-			}
-		}
+		//~ if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
+		//~ {
+			//~ printf("InterHautOccupe\n");
+			//~ if(estMemeCouleur(inter, getIntersectionHaut(inter)))
+			//~ {
+				//~ incrementChaine(getIntersectionHaut(inter)->chMere, inter);
+			//~ }
+		//~ }
 		
-		if(getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
-		{
-			printf("InterBasOccupe\n");
-			if(estMemeCouleur(inter, getIntersectionBas(inter)))
-			{
-				incrementChaine(getIntersectionBas(inter)->chMere, inter);
-			}
-		}
+		//~ if(getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
+		//~ {
+			//~ printf("InterDroiteOccupe\n");
+			//~ if(estMemeCouleur(inter, getIntersectionDroite(inter)))
+			//~ {
+				//~ incrementChaine(getIntersectionDroite(inter)->chMere, inter);
+			//~ }
+		//~ }
 		
-		if(getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true)
-		{
-			printf("InterGaucheOccupe\n");
-			if(estMemeCouleur(inter, getIntersectionGauche(inter)))
-			{
-				incrementChaine(getIntersectionGauche(inter)->chMere, inter);
-			}
-		}
+		//~ if(getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
+		//~ {
+			//~ printf("InterBasOccupe\n");
+			//~ if(estMemeCouleur(inter, getIntersectionBas(inter)))
+			//~ {
+				//~ incrementChaine(getIntersectionBas(inter)->chMere, inter);
+			//~ }
+		//~ }
+		
+		//~ if(getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true)
+		//~ {
+			//~ printf("InterGaucheOccupe\n");
+			//~ if(estMemeCouleur(inter, getIntersectionGauche(inter)))
+			//~ {
+				//~ incrementChaine(getIntersectionGauche(inter)->chMere, inter);
+			//~ }
+		//~ }
 	}
 	else 
 	{
@@ -610,23 +613,28 @@ void checkLesAdjacents(Intersection* inter)
 bool estNouvChaine(Intersection* inter)
 {
 	CouleurPierre couleurTest = inter->couleur; // couleur à vérifier
-	int cptCoulDiff = 0;
+	int cptCoulDiff = 0;	// On initialise le nombre de couleur qui divergent de celle de l'intersection
 	
+	// si l'intersection à au moins une intersection adjacente qui est occupée...
 	if (aAdjacentOccupe(inter) == true)
 	{
-		int nbAdjacents = getNbAdjacents(inter);
-		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
 		
+		int nbAdjacents = getNbAdjacents(inter);  // On récupère le nombre d'adjacents..
+		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);	//.. et les adjacents eux-mêmes
+		
+		// Pour chaque Adjacent...
 		for(int i = 0; i < nbAdjacents; i++)
 		{
+			//.. si sa couleur est différente de la pierre posée diffère de celle de la case adjacente, on incrémente le nombre de couleur divergent
 			if(lesAdjacents[i]->couleur != couleurTest)
 			{
 				cptCoulDiff++;
 			}
 		}
 		
-		free(lesAdjacents);
+		free(lesAdjacents); 
 		
+		// Si toutes les cases occupées adjacentes sont de couleur différente, on retourne vrai
 		if(cptCoulDiff == nbAdjacents)
 		{
 			return true;
@@ -642,25 +650,32 @@ bool estNouvChaine(Intersection* inter)
 
 Intersection** getLesAdjacents(Intersection* inter, int taille)
 {
-	Intersection** lesAdjacents = malloc(taille*sizeof(Intersection*));
+	Intersection** lesAdjacents = malloc(taille*sizeof(Intersection*)); // On crée un tableau qui contiendra les intersections adjacentes
 	
-	int i = 0;
+	int i = 0; // i fait office de compteur qui s'incrémente pour remplir le tableau
 	
+	// si  une intersection se trouve en haut on l'ajoute au tableau
 	if(getIntersectionHaut(inter))
 	{
 		lesAdjacents[i] = getIntersectionHaut(inter);
 		i++;
 	}
+	
+	// si  une intersection se trouve à droite on l'ajoute au tableau
 	if(getIntersectionDroite(inter))
 	{
 		lesAdjacents[i] = getIntersectionDroite(inter);
 		i++;
 	}
+	
+	// si  une intersection se trouve en bas on l'ajoute au tableau
 	if(getIntersectionBas(inter))
 	{
 		lesAdjacents[i] = getIntersectionBas(inter);
 		i++;
 	}
+	
+	// si une intersection se trouve à gauche on l'ajoute au tableau
 	if(getIntersectionGauche(inter))
 	{
 		lesAdjacents[i] = getIntersectionGauche(inter);
@@ -672,14 +687,17 @@ Intersection** getLesAdjacents(Intersection* inter, int taille)
 
 int getNbAdjacents(Intersection* inter)
 {
+	// Si c'est un coin, on a 2 intersections adjacentes
 	if(estCoin(inter))
 	{
 		return 2;
 	}
+	// Si c'est une bordure, on a 3 intersections adjacentes
 	else if(estBordure(inter))
 	{
 		return 3;
 	}
+	// Sinon, on en a 4
 	else
 	{
 		return 4;
@@ -690,18 +708,20 @@ bool aAdjacentOccupe(Intersection* inter)
 {
 	bool aAdjacentOccupe = false;
 	
-	int nbAdjacents = getNbAdjacents(inter);
-	Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+	int nbAdjacents = getNbAdjacents(inter); // On répupère le nombre d'intersections adjacentes
+	Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents); // On récupère ces mêmes intersections dans un tableau
 	
+	// Pour chaque intersection adjacente...
 	for(int i = 0; i < nbAdjacents; i++)
 	{
+		//.. si l'intersection est occupé par une pierre on retourne true
 		if(lesAdjacents[i]->estOccupe == true)
 		{
 			aAdjacentOccupe = true;
 		}
 	}
 	
-	free(lesAdjacents);
+	free(lesAdjacents);  //On libère la mémoire
 	return aAdjacentOccupe;
 }
 
