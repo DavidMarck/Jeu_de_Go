@@ -46,12 +46,6 @@ void draw_win_niveau()
 {	
 	clear_win();
 	
-	//~ Rectangle* btn19 = malloc(sizeof(Rectangle));
-	//~ btn19->x0 = MARGE_FEN;
-	//~ btn19->y0 = MARGE_FEN ;
-	//~ btn19->x1 = btn19->x0 + width_win() - 2*MARGE_FEN;
-	//~ btn19->y1 = btn19->y0 + 90;
-	
 	rectangle(MARGE_FEN,MARGE_FEN,width_win() - 2*MARGE_FEN,90);
 	string(width_win()/2,(MARGE_FEN + 45),"19x19");
 	
@@ -361,13 +355,6 @@ Intersection** creerTableInter()
 		posY += saut; // prochaine postion en y à traiter
 	}
 	
-	//~ for (int i = 0; i < dims_plateau; i++) 
-	//~ {
-		//~ for (int j = 0; j < dims_plateau; j++)
-		//~ {
-			//~ setFils(lesInters[i * dims_plateau + j]);  // On définit les intersections adjacentes (les fils)
-		//~ }
-	//~ }
 	return lesInters;
 }
 
@@ -520,12 +507,26 @@ Intersection* getIntersectionGauche(Intersection* inter)
 
 void incrementChaine(Chaine* chaine, Intersection* pierre)
 {
-	pierre->suiteChaine = NULL; // la pierre posée n'a pas de suivant
-	chaine->finChaine->suiteChaine = pierre; // la suite du dernier élément de la chaîne à laquelle on ajoute est désormais la pierre posée
-	chaine->finChaine = pierre; // le dernier élément de ladite chaîne devient la pierre ajoutée
-	pierre->chMere = chaine; // la pierre ajoutée appartient à la chaîne
-	chaine->nbPierres++; // on incrémente le nombre d'éléments de la chaîne
-	printf("chaine incrémentée");
+	// Si la pierre posée n'appartient pas encore à une chaîne
+	if(!pierre->chMere)
+	{
+		pierre->chMere = chaine; // la pierre ajoutée appartient maintenant à la chaîne
+		pierre->suiteChaine = NULL; // la pierre posée n'a pas de suivant
+		chaine->finChaine->suiteChaine = pierre; // la suite du dernier élément de la chaîne à laquelle on ajoute est désormais la pierre posée
+		chaine->finChaine = pierre; // le dernier élément de ladite chaîne devient la pierre ajoutée
+		chaine->nbPierres++; // on incrémente le nombre d'éléments de la chaîne
+		printf("chaine incrémentée\n");
+	}
+	// Si la pierre possée appartient déjà à une chaîne (cas où plusieurs chaînes adjacentes)
+	// et que celle de l'intersection adjacente en cours de vérification n'est pas déjà la même
+	else if(chaine != pierre->chMere)
+	{
+		chaine->debutChaine->chMere = pierre->chMere; // on ajoute la chaîne de la pierre adjacente à la chaîne de la pierre posée
+		pierre->suiteChaine = chaine->debutChaine; // on lie les deux chaînes
+		pierre->chMere->finChaine = chaine->finChaine; // on actualise le dernier élément
+		
+		supprimeChaine(chaine); // on libère la chaîne anciennement adjacente
+	}
 }
 
 bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
@@ -543,7 +544,7 @@ bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
 
 void initChaine(Intersection* inter)
 {
-	Chaine* c = malloc(sizeof(Chaine));	// on crée une chaine que l'on alloue
+	Chaine* c = malloc(sizeof(Chaine));	// on crée une chaine avec allocation
 	inter->chMere = c;	// on indique à l'intersection qu'elle appartient à cette chaine
 	c->debutChaine = inter;	// on indique à la chaine que l'intersection est son point de départ..
 	c->finChaine = inter;	//.. et son point de fin
@@ -552,13 +553,13 @@ void initChaine(Intersection* inter)
 	nbChaines++;	// On incrémente le nombre total de chaine
 }
 
-//~ void printChaines() 
-//~ {
-	//~ for(int i = 0; i < nbChaines; i++)
-	//~ {
-		//~ printf("%p\n", lesChaines[i]);
-	//~ }
-//~ }
+void printChaines() 
+{
+	for(int i = 0; i < nbChaines; i++)
+	{
+		printf("%p\n", lesChaines[i]);
+	}
+}
 
 void checkLesAdjacents(Intersection* inter)
 {
@@ -566,46 +567,21 @@ void checkLesAdjacents(Intersection* inter)
 	if (estNouvChaine(inter) == false)
 	{
 		
+		int nbAdjacents = getNbAdjacents(inter);
+		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
 		
-		//~ if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
-		//~ {
-			//~ printf("InterHautOccupe\n");
-			//~ if(estMemeCouleur(inter, getIntersectionHaut(inter)))
-			//~ {
-				//~ incrementChaine(getIntersectionHaut(inter)->chMere, inter);
-			//~ }
-		//~ }
-		
-		//~ if(getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
-		//~ {
-			//~ printf("InterDroiteOccupe\n");
-			//~ if(estMemeCouleur(inter, getIntersectionDroite(inter)))
-			//~ {
-				//~ incrementChaine(getIntersectionDroite(inter)->chMere, inter);
-			//~ }
-		//~ }
-		
-		//~ if(getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
-		//~ {
-			//~ printf("InterBasOccupe\n");
-			//~ if(estMemeCouleur(inter, getIntersectionBas(inter)))
-			//~ {
-				//~ incrementChaine(getIntersectionBas(inter)->chMere, inter);
-			//~ }
-		//~ }
-		
-		//~ if(getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true)
-		//~ {
-			//~ printf("InterGaucheOccupe\n");
-			//~ if(estMemeCouleur(inter, getIntersectionGauche(inter)))
-			//~ {
-				//~ incrementChaine(getIntersectionGauche(inter)->chMere, inter);
-			//~ }
-		//~ }
+		for(int i = 0; i < nbAdjacents; i++)
+		{
+			if((lesAdjacents[i]->estOccupe == true) && (estMemeCouleur(inter, lesAdjacents[i])))
+			{
+				incrementChaine(lesAdjacents[i]->chMere, inter);
+			}
+		}
+		free(lesAdjacents);
 	}
 	else 
 	{
-		printf("Intersection initialisée \n");
+		printf("Nouvelle chaîne \n");
 		initChaine(inter);
 	}
 }
@@ -723,6 +699,32 @@ bool aAdjacentOccupe(Intersection* inter)
 	
 	free(lesAdjacents);  //On libère la mémoire
 	return aAdjacentOccupe;
+}
+
+void supprimeChaine(Chaine* chaine)
+{
+	for(int i = 0; i < nbChaines; i++)
+	{
+		if(lesChaines[i] == chaine)
+		{
+			if(i != nbChaines - 1)
+			{
+				int j = i;
+				while(j != nbChaines - 1)
+				{
+					lesChaines[j] = lesChaines[j+1];
+					j++;
+				}
+				lesChaines[nbChaines-1] = NULL;
+			}
+			else
+			{
+				lesChaines[i] = NULL;
+			}
+		}
+	}
+	nbChaines--;
+	free(chaine);
 }
 
 void freeAll()

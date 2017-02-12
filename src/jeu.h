@@ -51,6 +51,7 @@ typedef struct sCoord
  * couleur : couleur de la pierre si l'intersection est occupée
  * type : Correspond au type d'emplacement de l'intersection (ex : coin haut)
  * suiteChaine : Intersection suivante dans la chaine
+ * chMere : chaine à laquelle appartient l'intersection
  */ 
 typedef struct sIntersection
 {
@@ -237,6 +238,11 @@ void checkLesAdjacents(Intersection* inter);
  * 
  */
 void printChaines();
+
+/**
+ * Supprime une chaîne de lesChaînes
+ */
+ void supprimeChaine(Chaine* chaine);
 
 /**
  * Libère la globalité des ressources mémoires utilisées
