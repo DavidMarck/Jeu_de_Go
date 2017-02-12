@@ -521,10 +521,11 @@ Intersection* getIntersectionGauche(Intersection* inter)
 
 void incrementChaine(Chaine* chaine, Intersection* pierre)
 {
-	pierre->suiteChaine = NULL;
-	chaine->finChaine->suiteChaine = pierre;
-	chaine->finChaine = pierre;
-	chaine->nbPierres++;
+	pierre->suiteChaine = NULL; // la pierre posée n'a pas de suivant
+	chaine->finChaine->suiteChaine = pierre; // la suite du dernier élément de la chaîne à laquelle on ajoute est désormais la pierre posée
+	chaine->finChaine = pierre; // le dernier élément de ladite chaîne devient la pierre ajoutée
+	pierre->chMere = chaine; // la pierre ajoutée appartient à la chaîne
+	chaine->nbPierres++; // on incrémente le nombre d'éléments de la chaîne
 	printf("chaine incrémentée");
 }
 
@@ -561,40 +562,39 @@ void printChaines()
 
 void checkLesAdjacents(Intersection* inter)
 {
-	
 	if (getIntersectionHaut(inter)->estOccupe == true || getIntersectionDroite(inter)->estOccupe == true || getIntersectionBas(inter)->estOccupe == true || getIntersectionGauche(inter)->estOccupe == true)
 	{
 		
-		if(getIntersectionHaut(inter))
+		if(getIntersectionHaut(inter) && getIntersectionHaut(inter)->estOccupe == true)
 		{
-			printf("loooooooooooooooo\n");
+			printf("InterHautOccupe\n");
 			if(estMemeCouleur(inter, getIntersectionHaut(inter)))
 			{
 				incrementChaine(getIntersectionHaut(inter)->chMere, inter);
 			}
 		}
 		
-		if(getIntersectionDroite(inter))
+		if(getIntersectionDroite(inter) && getIntersectionDroite(inter)->estOccupe == true)
 		{
-			printf("loooooooooooooooo\n");
+			printf("InterDroiteOccupe\n");
 			if(estMemeCouleur(inter, getIntersectionDroite(inter)))
 			{
 				incrementChaine(getIntersectionDroite(inter)->chMere, inter);
 			}
 		}
 		
-		if(getIntersectionBas(inter))
+		if(getIntersectionBas(inter) && getIntersectionBas(inter)->estOccupe == true)
 		{
-			printf("loooooooooooooooo\n");
+			printf("InterBasOccupe\n");
 			if(estMemeCouleur(inter, getIntersectionBas(inter)))
 			{
 				incrementChaine(getIntersectionBas(inter)->chMere, inter);
 			}
 		}
 		
-		if(getIntersectionGauche(inter))
+		if(getIntersectionGauche(inter) && getIntersectionGauche(inter)->estOccupe == true)
 		{
-			printf("loooooooooooooooo\n");
+			printf("InterGaucheOccupe\n");
 			if(estMemeCouleur(inter, getIntersectionGauche(inter)))
 			{
 				incrementChaine(getIntersectionGauche(inter)->chMere, inter);
