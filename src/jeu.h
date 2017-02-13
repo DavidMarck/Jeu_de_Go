@@ -212,7 +212,7 @@ void setTypeIntersection (Intersection* inter);
 /**
  * 
  */
-void checkLesAdjacents(Intersection* inter);
+void chainage(Intersection* inter);
 
 /**
  * Vérifie à la pose d'une pierre si une nouvelle chaîne va être créée ou non

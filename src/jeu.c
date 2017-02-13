@@ -73,9 +73,9 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 	{
 		filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
 		inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
-		inter->couleur = tour;
-		checkLesAdjacents(inter);
-		updateNbLibertes();
+		inter->couleur = tour; // On adapte la couleur au joueur
+		chainage(inter);  // On gère la création/fusion de chaines
+		updateNbLibertes(); // On met à jour les libertés du plateau
 		printChaines();
 		changerTour(); // ... et enfin on passe au tour suivant
 	}
@@ -83,24 +83,27 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 
 void updateNbLibertes() 
 {
+	// Pour chaque intersection du plateau...
 	for (int i = 0; i < dims_plateau; i++) 
 	{
 		for (int j = 0; j < dims_plateau; j++)
 		{
-			int nbAdjacents = getNbAdjacents(lesInters[i * dims_plateau + j]);
-			Intersection** lesAdjacents = getLesAdjacents(lesInters[i * dims_plateau + j],nbAdjacents);
+			int nbAdjacents = getNbAdjacents(lesInters[i * dims_plateau + j]);	// On récupère le nombre intersection adjacentes à l'intersection ciblée...
+			Intersection** lesAdjacents = getLesAdjacents(lesInters[i * dims_plateau + j],nbAdjacents); //.. et les cases adjacentes elles-mêmes
 			
-			int nbAdjOcc = 0;
+			int nbAdjOcc = 0; // On initialise le nombre d'occurences occupées par une pierre
 			
+			// pour chaque intersection adjacente...
 			for(int k = 0; k < nbAdjacents; k++)
 			{	
+				// Si l'intersection est occupée par une pierre, on incrémente les occurences
 				if(lesAdjacents[k]->estOccupe == true)
 				{
 					nbAdjOcc++;
 				}
 			}
 			
-			lesInters[i * dims_plateau + j]->nbLibertes = getNbLibertesTotal(lesInters[i * dims_plateau + j]) - nbAdjOcc;
+			lesInters[i * dims_plateau + j]->nbLibertes = getNbLibertesTotal(lesInters[i * dims_plateau + j]) - nbAdjOcc; // L'intersection ciblée récupère les libertés
 			free(lesAdjacents);
 		}
 	}
@@ -437,8 +440,7 @@ void setNbLibertes(Intersection* inter)
 }
 
 int getNbLibertesTotal(Intersection* inter)
-{
-			
+{			
 	if(estCoin(inter))
 	{
 		return 2;
@@ -637,17 +639,19 @@ void printInters()
 	}
 }
 
-void checkLesAdjacents(Intersection* inter)
+void chainage(Intersection* inter)
 {
 	// Si une chaine n'est pas à initialiser (car adjacente à une autre de la même couleur)...
 	if (estNouvChaine(inter) == false)
 	{
 		
-		int nbAdjacents = getNbAdjacents(inter);
-		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+		int nbAdjacents = getNbAdjacents(inter);						  // On récupère le nombre d'adjacent
+		Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents); // On récupère les intersections adjacentes à l'intersection 
 		
+		// Pour chaque case adjacentes..
 		for(int i = 0; i < nbAdjacents; i++)
 		{
+			// Si l'intersection adjacente est occupée par une pierre de la même couleur que l'intersection cible, on incrémente la chaine
 			if((lesAdjacents[i]->estOccupe == true) && (estMemeCouleur(inter, lesAdjacents[i])))
 			{
 				incrementChaine(lesAdjacents[i]->chMere, inter);
@@ -658,7 +662,7 @@ void checkLesAdjacents(Intersection* inter)
 	else 
 	{
 		printf("Nouvelle chaîne \n");
-		initChaine(inter);
+		initChaine(inter); // On place l'intersection dans une autre chaine
 	}
 }
 
@@ -758,15 +762,17 @@ int getNbAdjacents(Intersection* inter)
 
 Intersection** getLesLibertes(Intersection* inter)
 {
-	int nbLibertes = inter->nbLibertes;
-	Intersection** lesLibertes = malloc(nbLibertes*sizeof(Intersection*));
-	int indexLiberte = 0;
+	int nbLibertes = inter->nbLibertes;  // nombres de libertés actuelles à l'intersection
+	Intersection** lesLibertes = malloc(nbLibertes*sizeof(Intersection*)); // On crée un tableau qui contiendra les libertés(Intersections*) de l'intersection
+	int indexLiberte = 0; // On initialise un compteur
 	
 	int nbAdjacents = getNbAdjacents(inter);
 	Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
 	
+	// Pour chaque intersection adjacente à la chaine cible...
 	for(int i = 0; i < nbAdjacents; i++)
 	{
+		// ... si l'intersection adjacente n'est pas occupée, on ajoute la liberté correspondante (le nombre étant symbolisé par le compteur)
 		if(!lesAdjacents[i]->estOccupe)
 		{
 			lesLibertes[indexLiberte] = lesAdjacents[i];
@@ -813,13 +819,6 @@ int getNbLibertesChaine(Chaine* chaine)
 	{
 		lesLibertesInter = getLesLibertes(inter);
 		
-		//~ for (int k = 0; k < inter->nbLibertes; k++)
-			//~ {
-				//~ printf("les inters adj libres de l'inter [%d] = %p\t positionsX,Y : %d ; %d\n", k, lesLibertesInter[k], lesLibertesInter[k]->position->posX, lesLibertesInter[k]->position->posY);
-			//~ }
-			
-			
-		
 		for(int i = 0; i < inter->nbLibertes; i++)
 		{
 			
@@ -847,17 +846,9 @@ int getNbLibertesChaine(Chaine* chaine)
 				lesLibertesChaine[0] = lesLibertesInter[i];
 				nbLibChaine++;
 			}
-			//~ printf("%p\n",lesLibertesInter[i]);
-			//~ printf("%d\n",nbLibChaine);
 		}
-		
 		inter = inter->suiteChaine;
 	} while (inter != NULL);
-	
-	//~ for (int i = 0; i < nbLibChaine; i++)
-	//~ {
-		//~ printf("les cahines[%d] = %p\t positionsX,Y : %d ; %d\n", i, lesLibertesChaine[i], lesLibertesChaine[i]->position->posX, lesLibertesChaine[i]->position->posY);
-	//~ }
 	
 	free(lesLibertesInter);
 	free(lesLibertesChaine);
