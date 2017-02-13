@@ -90,16 +90,17 @@ void updateNbLibertes()
 			int nbAdjacents = getNbAdjacents(lesInters[i * dims_plateau + j]);
 			Intersection** lesAdjacents = getLesAdjacents(lesInters[i * dims_plateau + j],nbAdjacents);
 			
+			int nbAdjOcc = 0;
+			
 			for(int k = 0; k < nbAdjacents; k++)
-			{
+			{	
 				if(lesAdjacents[k]->estOccupe == true)
 				{
-					printf("%d\n",lesInters[i * dims_plateau + j]->nbLibertes);
-					lesInters[i * dims_plateau + j]->nbLibertes--;
-					printf("%d\n",lesInters[i * dims_plateau + j]->nbLibertes);
+					nbAdjOcc++;
 				}
 			}
 			
+			lesInters[i * dims_plateau + j]->nbLibertes = getNbLibertesTotal(lesInters[i * dims_plateau + j]) - nbAdjOcc;
 			free(lesAdjacents);
 		}
 	}
@@ -159,9 +160,29 @@ bool coupEstPermis(Intersection* inter)
 	bool estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
 	int nbLibertes = inter->nbLibertes;
 	
-	if(estVide == false && estOccupe == false && nbLibertes > 0) // si l'intersection n'est pas vide, ni occupée, qu'elle a des libertés et qu'il ne s'agit pas d'une capture...
+	if(estVide == false && estOccupe == false) // s'il s'agit bien d'une intersection du plateau (non vide), et qu'elle n'est pas occupée...
 	{
-		return true;
+		if(nbLibertes > 0) // si il y a au moins une liberté, on peut poser
+		{
+			return true;
+		}
+		else // sinon si il n'y aplus de liberté
+		{	
+			int nbAdjacents = getNbAdjacents(inter);
+			Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+			
+			for(int i = 0; i < nbAdjacents; i++)
+			{
+				if(lesAdjacents[i]->couleur != tour) // si au moins une intersection adjacente  n'est pas de la même couleur, on ne peut pas poser
+				{
+					free(lesAdjacents);
+					return false;
+				}
+			}
+			
+			free(lesAdjacents);
+			return true; // toutes les intersections adjacentes sont occupées de pierres de la même couleur, on peut poser
+		}
 	}
 	return false;
 }
@@ -204,7 +225,7 @@ void key_pressed(KeySym code, char c, int x_souris, int y_souris)
 			break;
 	//~ case XK_Return:
 	//~ case XK_Shift_L:
-	//~ case XK_Control_R:
+	//~   case XK_Control_R:
 	//~ ....
 		default:
 			break;
@@ -362,6 +383,7 @@ Intersection** creerTableInter()
 			lesInters[i * dims_plateau + j] = nouvIntersection(nouvCoord(posX, posY)); // ... et on les stocke dans le tableau
 			setTypeIntersection(lesInters[i * dims_plateau + j]); // on attribue le type de l'intersection (bord, coin etc..)
 			setNbLibertes(lesInters[i * dims_plateau + j]); // on attribue les libertés
+			lesInters[i * dims_plateau + j]->chMere = NULL;
 			posX += getCoteCase(); // prochaine postion en x à traiter
 		}
 		posX = MARGE_FEN;
@@ -412,6 +434,21 @@ void setNbLibertes(Intersection* inter)
 	{
 		inter->nbLibertes = 4;
 	}
+}
+
+int getNbLibertesTotal(Intersection* inter)
+{
+			
+	if(estCoin(inter))
+	{
+		return 2;
+	} 
+	else if (estBordure(inter))
+	{
+		return 3;
+	}
+	
+	return 4;
 }
 
 void setTypeIntersection (Intersection* inter)
@@ -521,8 +558,9 @@ Intersection* getIntersectionGauche(Intersection* inter)
 void incrementChaine(Chaine* chaine, Intersection* pierre)
 {
 	// Si la pierre posée n'appartient pas encore à une chaîne
-	if(!pierre->chMere)
+	if(pierre->chMere == NULL)
 	{
+		printf("chaine = %p\tpierre->chMere = %p\n", chaine, pierre->chMere);
 		pierre->chMere = chaine; // la pierre ajoutée appartient maintenant à la chaîne
 		pierre->suiteChaine = NULL; // la pierre posée n'a pas de suivant
 		chaine->finChaine->suiteChaine = pierre; // la suite du dernier élément de la chaîne à laquelle on ajoute est désormais la pierre posée
@@ -534,7 +572,16 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 	// et que celle de l'intersection adjacente en cours de vérification n'est pas déjà la même
 	else if(chaine != pierre->chMere)
 	{
-		chaine->debutChaine->chMere = pierre->chMere; // on ajoute la chaîne de la pierre adjacente à la chaîne de la pierre posée
+		printf("chaine = %p\tpierre->chMere = %p\n", chaine, pierre->chMere);
+		printf("Meut Meurt Meurt !!!!!!!\n");
+		Intersection* parcoursChaine = chaine->debutChaine;
+		do
+		{
+			parcoursChaine->chMere = pierre->chMere;
+			parcoursChaine = parcoursChaine->suiteChaine;
+		}
+		while(parcoursChaine);
+		//chaine->debutChaine->chMere = pierre->chMere; // on ajoute la chaîne de la pierre adjacente à la chaîne de la pierre posée
 		pierre->suiteChaine = chaine->debutChaine; // on lie les deux chaînes
 		pierre->chMere->finChaine = chaine->finChaine; // on actualise le dernier élément
 		
@@ -568,9 +615,26 @@ void initChaine(Intersection* inter)
 
 void printChaines() 
 {
+	//~ printf("nb de chaines total : %d\n", nbChaines);
 	for(int i = 0; i < nbChaines; i++)
 	{
+		
 		printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));
+	}
+}
+
+void printInters() 
+{
+	//~ printf("nb de chaines total : %d\n", nbChaines);
+	for(int i = 0; i < dims_plateau; i++)
+	{
+		for(int j = 0; j < dims_plateau; j++)
+		{
+			if(lesInters[i * dims_plateau + j]->estOccupe == true)
+			{
+				printf("%p; libertés = %d\n", lesInters[i * dims_plateau + j], lesInters[i * dims_plateau + j]->nbLibertes);
+			}
+		}
 	}
 }
 
@@ -693,6 +757,28 @@ int getNbAdjacents(Intersection* inter)
 	}
 }
 
+Intersection** getLesLibertes(Intersection* inter)
+{
+	int nbLibertes = inter->nbLibertes;
+	Intersection** lesLibertes = malloc(nbLibertes*sizeof(Intersection*));
+	int indexLiberte = 0;
+	
+	int nbAdjacents = getNbAdjacents(inter);
+	Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
+	
+	for(int i = 0; i < nbAdjacents; i++)
+	{
+		if(!lesAdjacents[i]->estOccupe)
+		{
+			lesLibertes[indexLiberte] = lesAdjacents[i];
+			indexLiberte++;
+		}
+	}
+	
+	free(lesAdjacents);
+	return lesLibertes;
+}
+
 bool aAdjacentOccupe(Intersection* inter)
 {
 	bool aAdjacentOccupe = false;
@@ -716,16 +802,53 @@ bool aAdjacentOccupe(Intersection* inter)
 
 int getNbLibertesChaine(Chaine* chaine)
 {
-	int nbTotLibertes = 0;
+	int nbLibChaine = 0;
 	Intersection* inter = chaine->debutChaine;
+	
+	Intersection** lesLibertesInter;
+	Intersection** lesLibertesChaine = malloc(dims_plateau*dims_plateau*sizeof(Intersection*));
+	
+	bool libDejaListee = false;
 	
 	do
 	{
-		nbTotLibertes += inter->nbLibertes;
+		lesLibertesInter = getLesLibertes(inter);
+		
+		for(int i = 0; i < inter->nbLibertes; i++)
+		{
+			
+			libDejaListee = false;
+			
+			if(lesLibertesChaine != NULL) 
+			{
+				for (int j = 0; j < nbLibChaine; j++) 
+				{
+					if(lesLibertesChaine[j] == lesLibertesInter[i])
+					{
+						printf("+1\n");
+						libDejaListee = true;
+					}
+				}
+				
+				if(libDejaListee == false)
+				{
+					lesLibertesChaine[nbLibChaine] = lesLibertesInter[i];
+					nbLibChaine++;
+				}
+			}
+			else
+			{
+				lesLibertesChaine[0] = lesLibertesInter[i];
+				nbLibChaine++;
+			}
+		}
+		
 		inter = inter->suiteChaine;
-	} while (inter);
+	} while (inter != NULL);
 	
-	return nbTotLibertes;
+	free(lesLibertesInter);
+	free(lesLibertesChaine);
+	return nbLibChaine;
 }
 
 void supprimeChaine(Chaine* chaine)

@@ -232,6 +232,12 @@ void checkLesAdjacents(Intersection* inter);
   * inter : intersection dont on veut connaître le nombre d'adjacences
   */
  int getNbAdjacents(Intersection* inter);
+ 
+ /**
+  * retourne un tableau contenant les libertes d'une intersection
+  * inter : intersection dont on veut obtenir les libertes
+  */
+Intersection** getLesLibertes(Intersection* inter);
 
 /**
  * Détermine si au moins une intersection adjacente est occupée par une pierre
@@ -243,12 +249,19 @@ void checkLesAdjacents(Intersection* inter);
  * 
  */
 void printChaines();
+void printInters();
 
 /**
  * Retourne le nombre total des libertés d'une chaîne
  * chaine : la chaîne dont on souhaite connaître le nombre de libertés
  */
 int getNbLibertesChaine(Chaine* chaine);
+
+/**
+ * Retourne le nombre de liberté total que peut avoir une intersection
+ * inter : l'intersection en question
+ */
+int getNbLibertesTotal(Intersection* inter);
 
 /**
  * Supprime une chaîne de lesChaînes
