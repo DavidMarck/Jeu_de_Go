@@ -573,7 +573,6 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 	else if(chaine != pierre->chMere)
 	{
 		printf("chaine = %p\tpierre->chMere = %p\n", chaine, pierre->chMere);
-		printf("Meut Meurt Meurt !!!!!!!\n");
 		Intersection* parcoursChaine = chaine->debutChaine;
 		do
 		{
@@ -581,9 +580,10 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 			parcoursChaine = parcoursChaine->suiteChaine;
 		}
 		while(parcoursChaine);
-		//chaine->debutChaine->chMere = pierre->chMere; // on ajoute la chaîne de la pierre adjacente à la chaîne de la pierre posée
-		pierre->suiteChaine = chaine->debutChaine; // on lie les deux chaînes
+
+		pierre->chMere->finChaine->suiteChaine = chaine->debutChaine; // On acolle la nouvelle chaine croisée à celle parente à la pierre posée
 		pierre->chMere->finChaine = chaine->finChaine; // on actualise le dernier élément
+		pierre->chMere->nbPierres += chaine->nbPierres;
 		
 		supprimeChaine(chaine); // on libère la chaîne anciennement adjacente
 	}
@@ -618,8 +618,16 @@ void printChaines()
 	//~ printf("nb de chaines total : %d\n", nbChaines);
 	for(int i = 0; i < nbChaines; i++)
 	{
+		Intersection* inter = lesChaines[i]->debutChaine;
+		int j = 0;
+		do
+		{
+			printf("Chaine n° %d, élément %d : %p\tposX,Y : %d  ,  %d\n",i, j, inter, inter->position->posX, inter->position->posY);
+			inter = inter->suiteChaine;
+			j++;
+		}while(inter);
+		//~ printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));
 		
-		printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));
 	}
 }
 
@@ -814,6 +822,13 @@ int getNbLibertesChaine(Chaine* chaine)
 	{
 		lesLibertesInter = getLesLibertes(inter);
 		
+		//~ for (int k = 0; k < inter->nbLibertes; k++)
+			//~ {
+				//~ printf("les inters adj libres de l'inter [%d] = %p\t positionsX,Y : %d ; %d\n", k, lesLibertesInter[k], lesLibertesInter[k]->position->posX, lesLibertesInter[k]->position->posY);
+			//~ }
+			
+			
+		
 		for(int i = 0; i < inter->nbLibertes; i++)
 		{
 			
@@ -825,8 +840,8 @@ int getNbLibertesChaine(Chaine* chaine)
 				{
 					if(lesLibertesChaine[j] == lesLibertesInter[i])
 					{
-						printf("+1\n");
 						libDejaListee = true;
+						break;
 					}
 				}
 				
@@ -841,10 +856,17 @@ int getNbLibertesChaine(Chaine* chaine)
 				lesLibertesChaine[0] = lesLibertesInter[i];
 				nbLibChaine++;
 			}
+			//~ printf("%p\n",lesLibertesInter[i]);
+			//~ printf("%d\n",nbLibChaine);
 		}
 		
 		inter = inter->suiteChaine;
 	} while (inter != NULL);
+	
+	//~ for (int i = 0; i < nbLibChaine; i++)
+	//~ {
+		//~ printf("les cahines[%d] = %p\t positionsX,Y : %d ; %d\n", i, lesLibertesChaine[i], lesLibertesChaine[i]->position->posX, lesLibertesChaine[i]->position->posY);
+	//~ }
 	
 	free(lesLibertesInter);
 	free(lesLibertesChaine);
