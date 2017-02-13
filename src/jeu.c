@@ -618,16 +618,7 @@ void printChaines()
 	//~ printf("nb de chaines total : %d\n", nbChaines);
 	for(int i = 0; i < nbChaines; i++)
 	{
-		Intersection* inter = lesChaines[i]->debutChaine;
-		int j = 0;
-		do
-		{
-			printf("Chaine n° %d, élément %d : %p\tposX,Y : %d  ,  %d\n",i, j, inter, inter->position->posX, inter->position->posY);
-			inter = inter->suiteChaine;
-			j++;
-		}while(inter);
-		//~ printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));
-		
+		printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));	
 	}
 }
 
