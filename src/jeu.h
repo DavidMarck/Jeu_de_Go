@@ -6,6 +6,8 @@
 
 /** 
  * énumération des couleurs de pierre
+ * BLANC : pierre blanche
+ * NOIR : pierre Noire
  */
 typedef enum eCouleurPierre
 {
@@ -32,10 +34,15 @@ typedef enum eTypeInter
 	DEFAUT
 } TypeInter;
 
+/**
+ * énumération qui indique le mode de jeu
+ * MENU : mode de choix du plateau
+ * JEU : mode de jeu
+ */
 typedef enum eMode
 {
-	Menu,
-	Jeu
+	MENU, 
+	JEU
 } Mode;
 
 /** 
@@ -89,7 +96,11 @@ typedef struct sChaine
 void draw_win_plateau();
 
 
+/**
+ * Dessine la fenêtre relative au menu
+ */
 void draw_win_menu();
+
 /**
  * Création du plateau de jeu
  * (appelée dans draw_win_plateau)
@@ -104,7 +115,7 @@ void dessine_hoshi();
 
 
 /**
- * 
+ * Dessine les pierres selon les données contenu dans le tableau lesInters
  */
  void dessine_Pierres();
  
@@ -219,13 +230,27 @@ void setNbLibertes(Intersection* inter);
 
 /**
  * Attribue le type d'intersection lors de la création de chacunes d'elles 
+ * inter : l'intersection dont on veut les libertés
  */ 
 void setTypeIntersection (Intersection* inter);
 
 /**
- * 
+ * Cette fonction crée ou fusionne les chaînes lors de la pose d'une pierre
+ * inter : l'intersection sur laquelle on a posé une pierre
  */
 void chainage(Intersection* inter);
+
+/**
+ *	Met à jour les libertés des différentes chaines et supprime les chaines capturées
+ */
+void updateLibertesChaines();
+
+/**
+ *	Met à jour le plateau dans son intégralité, il appelle updateLibertesChaines et redessine les éléments
+ * 	(pour supprimer les chaines qui se font capturer)
+ */
+void updatePlateau ();
+
 
 /**
  * Vérifie à la pose d'une pierre si une nouvelle chaîne va être créée ou non
@@ -262,6 +287,7 @@ Intersection** getLesLibertes(Intersection* inter);
  * 
  */
 void printChaines();
+
 void printInters();
 
 /**

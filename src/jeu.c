@@ -10,17 +10,17 @@ const float RAYON_PIERRE_13 = 15; // rayon d'une pierre sur un plateau 13x13
 const float COTE_CASE_9 = 67.5; // côté des cases plateau 9x9 lignes (8x8 cases) ==> 18/8 * COTE_CASE_19
 const float RAYON_PIERRE_9 = 22.5; // rayon d'une pierre sur un plateau 9x9
 
-const int MARGE_FEN = 45;
+const int MARGE_FEN = 45; // Marge du plateau par rapport à la fenêtre
 
 const int COTE_FEN = 630; // 18*COTE_CASE_19 + 2*MARGE_FEN; à modifier quand la marge change
 
 static int dims_plateau; // dimensions du plateau choisies (19, 13 ou 9)
 static Intersection** lesInters; // tableau de structures contenant les intersections du goban (plateau)
 static Chaine** lesChaines;	// tableau de structures contenant les chaines du goban au fil de la partie(plateau)
-static int nbChaines = 0;
+static int nbChaines = 0; // Valeur permettant de parcourir 
 
 static CouleurPierre tour = NOIR;  // indique le tour actuel
-static Mode modeJeu = Menu;
+static Mode modeJeu = MENU;  // prend en compte les hitbox du menu
 
 /**
  * Mettre ici son code pour dessiner dans la fenetre (plateau)
@@ -30,14 +30,13 @@ void draw_win_plateau()
 {	
 	// vide la fenetre
 	clear_win();
+
+	float coteCase = getCoteCase(); 	// on récupère la longueur du côté des cases en fonction de la dimension du plateau
+	color(1, 0, 0);  // On prend une couleur rouge pour les cases
+	rectangle(MARGE_FEN,MARGE_FEN,(dims_plateau-1)*coteCase, (dims_plateau-1)*coteCase);	// Trace le rectangle qui fait le contour du plateau
 	
-	// on récupère la longueur du côté des cases en fonction de la dimension du plateau
-	float coteCase = getCoteCase();
-	color(1, 0, 0);
-	rectangle(MARGE_FEN,MARGE_FEN,(dims_plateau-1)*coteCase, (dims_plateau-1)*coteCase);
-	
-	dessine_plateau();
-	dessine_hoshi();
+	dessine_plateau(); // Dessine le plateau du jeu (en fonction des dimensions choisies dans le menu)
+	dessine_hoshi(); // met en place les hoshis du plateau
 	
 	//~ if( nbChaines > 0) {
 		//~ dessine_Pierres();
@@ -53,22 +52,20 @@ void draw_win_plateau()
 	color(0, 0, 0);
 }
 
-/**
- * Mettre ici son code pour dessiner dans la fenetre (niveau)
- * 1er affichage + redessine si resize
- */
+
 void draw_win_menu()
 {	
 	clear_win();
 	
-	color(0.5,0.5,0.5);
+	color(0.5,0.5,0.5); // Couleur grise
 	
-	filled_rectangle(MARGE_FEN*5,MARGE_FEN,width_win() - 10*MARGE_FEN,90);
-	filled_rectangle(MARGE_FEN*5,2*MARGE_FEN + 90,width_win() - 10*MARGE_FEN,90);
-	filled_rectangle(MARGE_FEN*5,3*MARGE_FEN + 2*90,width_win() - 10*MARGE_FEN,90);
+	filled_rectangle(MARGE_FEN*5,MARGE_FEN,width_win() - 10*MARGE_FEN,90);		// Le bouton pour le plateau 19x19
+	filled_rectangle(MARGE_FEN*5,2*MARGE_FEN + 90,width_win() - 10*MARGE_FEN,90);  // Le bouton pour le plateau 13x13
+	filled_rectangle(MARGE_FEN*5,3*MARGE_FEN + 2*90,width_win() - 10*MARGE_FEN,90);	// Le bouton pour le plateau 9x9
 	
-	color (1,1,1);
+	color (1,1,1); // Couleurblanche
 	
+	//on installe les string sur les boutons
 	string(width_win()/2,(MARGE_FEN + 45),"19x19");
 	string(width_win()/2,(MARGE_FEN + 45)+(MARGE_FEN+90),"13x13");
 	string(width_win()/2,(MARGE_FEN + 45)+2*(MARGE_FEN+90),"9x9");
@@ -86,7 +83,7 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 {
 	switch (modeJeu)
 	{
-		case Menu :
+		case MENU :		// Si on est sur la fenêtre de menu, on définit les coordonnées des boutons sur lesquels on peut cliquer
 		
 			if (x >= MARGE_FEN*5 && x <= width_win() - 5*MARGE_FEN)
 			{
@@ -96,7 +93,7 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 					lesInters = creerTableInter();
 					lesChaines = malloc(dims_plateau * dims_plateau * sizeof(Chaine*));
 					draw_win_plateau();
-					modeJeu = Jeu;
+					modeJeu = JEU;
 				}
 				else if (y >= (2*MARGE_FEN + 90) && y <= (2*MARGE_FEN + 2*90))
 				{
@@ -104,7 +101,7 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 					lesInters = creerTableInter();
 					lesChaines = malloc(dims_plateau * dims_plateau * sizeof(Chaine*));
 					draw_win_plateau();
-					modeJeu = Jeu;
+					modeJeu = JEU;
 				}
 				else if ( y >= (3*MARGE_FEN + 2*90) &&  y <= (3*MARGE_FEN + 3*90))
 				{
@@ -112,13 +109,11 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 					lesInters = creerTableInter();
 					lesChaines = malloc(dims_plateau * dims_plateau * sizeof(Chaine*));
 					draw_win_plateau();
-					modeJeu = Jeu;
+					modeJeu = JEU;
 				}
 			}
-			//~ printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 			break;
-		
-		case Jeu :
+		case JEU :
 		
 			//~ if ( x >= 0 && x<= 100 && y >= height_win() - 20 && y <= height_win())
 			//~ {
@@ -128,9 +123,10 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 			//~ }
 			//~ else 
 			//~ {
+			
 			printf("Bouton %d presse au coord. %d,%d \n",bouton,x,y);
 
-			Intersection* inter = getIntersection(x, y); // on récupère l'intersection sur laquelle on va placer la pierre (x,y du clic)
+			Intersection* inter = getIntersection(x, y);
 			
 			if(coupEstPermis(inter)) // Si le coup est permis
 			{
@@ -141,8 +137,7 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 				updateNbLibertes(); // On met à jour les libertés du plateau
 				
 				updatePlateau();
-				
-				printChaines();	
+					
 				changerTour(); // ... et enfin on passe au tour suivant
 			}
 			break;	
@@ -152,24 +147,29 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 
 void updateLibertesChaines()
 {
+	// On parcourt toutes les chaines en jeu...
 	for (int i = 0; i < nbChaines; i++) 
 	{
+		// Si une chaine n'a plus de liberté, on parcourt toutes les pierres(Intersection) qu'elles contient pour les vider
 		if(getNbLibertesChaine(lesChaines[i]) == 0) 
 		{
-			Intersection* interParcours = lesChaines[i]->debutChaine;
+			Intersection* interParcours = lesChaines[i]->debutChaine;  // permet de parcourir la chaine
 			
 			do
 			{
 				int nbAdjacents = getNbAdjacents(interParcours);	// On récupère le nombre intersection adjacentes à l'intersection ciblée...
 				Intersection** lesAdjacents = getLesAdjacents(interParcours, nbAdjacents); //.. et les cases adjacentes elles-mêmes
+				
+				// On rend une liberté aux intersections adjacentes
 				for (int i = 0; i < nbAdjacents; i++)
 				{
 					lesAdjacents[i]->nbLibertes++;
 				}
-				interParcours->estOccupe = false;
-				interParcours->chMere = NULL;
-				interParcours->couleur = 0;
-				interParcours = interParcours->suiteChaine;
+				
+				interParcours->estOccupe = false;  // On indique que l'intersection n'est plus occupée par une pierre...
+				interParcours->chMere = NULL; //.., qu'elle n'appartient plus à une chaine...
+				interParcours->couleur = 0;	//.., qu'elle n'a plus de couleur..
+				interParcours = interParcours->suiteChaine;	//..et on passe à l'intersection suivante de la chaine
 			} while(interParcours != NULL);
 			
 			
@@ -180,10 +180,9 @@ void updateLibertesChaines()
 
 void updatePlateau ()
 {
-	updateLibertesChaines();
-	draw_win_plateau();
-	
-	dessine_Pierres();
+	updateLibertesChaines();  // Met à jour les libertés des chaines
+	draw_win_plateau();	// Redessine le plateau (pour effacer toute les pierres)
+	dessine_Pierres();	// Dessine les pierres qui sont en encore en jeu
 }
 
 void updateNbLibertes() 
@@ -266,27 +265,29 @@ bool coupEstPermis(Intersection* inter)
 {
 	bool coupEstPermis = false;
 	
-	bool estVide = interEstVide(inter); // si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
-	bool estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
+	bool estVide = interEstVide(inter); // Si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
+	bool estOccupe = inter->estOccupe; // On vérifie que l'intersection concernée ne soit pas occupée
 	int nbLibertes = inter->nbLibertes;
 	
-	if(estVide == false && estOccupe == false) // s'il s'agit bien d'une intersection du plateau (non vide), et qu'elle n'est pas occupée...
+	if(estVide == false && estOccupe == false) // S'il s'agit bien d'une intersection du plateau (non vide), et qu'elle n'est pas occupée...
 	{
-		if(nbLibertes > 0) // si il y a au moins une liberté, on peut poser
+		if(nbLibertes > 0) // Si il y a au moins une liberté, on peut poser
 		{
 			coupEstPermis = true;
 		}
-		else // sinon si il n'y aplus de liberté
+		else // Sinon si il n'y aplus de liberté
 		{	
+			// On appelle les intersection adjacentes à celle ciblée
 			int nbAdjacents = getNbAdjacents(inter);
 			Intersection** lesAdjacents = getLesAdjacents(inter,nbAdjacents);
 			
+			// Pour chaque intersection adjacente
 			for(int i = 0; i < nbAdjacents; i++)
 			{
+				// Si une intersection adjacente n'est pas de la même couleur que celle de la pierre que l'on veut poser...
 				if(lesAdjacents[i]->couleur != tour) 
 				{
-					printf(" libertés chaine %p : %d\n",lesAdjacents[i]->chMere,getNbLibertesChaine(lesAdjacents[i]->chMere));
-					if(getNbLibertesChaine(lesAdjacents[i]->chMere) == 1) // La pierre adjacente adverse sera capturée par la pose
+					if(getNbLibertesChaine(lesAdjacents[i]->chMere) == 1) //..et qu'elle sera capturée par la pose, on autorise la pose
 					{
 						coupEstPermis = true;
 						break;
@@ -334,7 +335,6 @@ void key_pressed(KeySym code, char c, int x_souris, int y_souris)
 		printf("char: %c \n",c);
 
 	printf(" avec pos souris: %d,%d \n",x_souris,y_souris);
-
 }
 
 void dessine_plateau()
@@ -396,14 +396,17 @@ void dessine_hoshi()
 
 void dessine_Pierres()
 {
+	// On parcourt toutes les intersections du plateau
 	for (int i = 0; i < dims_plateau; i++) 
 	{
 		for (int j = 0; j < dims_plateau; j++)
 		{
+			//	Si une intersection est occupée..
 			if(lesInters[i * dims_plateau + j]->estOccupe == true)
 			{
-				//~ printf("lesInters[i * dims_plateau + j]->estOccupe == true %d\t adr : %p\n", lesInters[i * dims_plateau + j]->estOccupe == true, lesInters[i * dims_plateau + j]);
-				switch (lesInters[i * dims_plateau + j]->couleur) 
+			
+			//... On adapte la couleur de la pierre occupante
+			switch (lesInters[i * dims_plateau + j]->couleur) 
 				{
 					case NOIR :
 						color (0, 0, 0);
@@ -416,8 +419,7 @@ void dessine_Pierres()
 					default :
 						break;
 				}
-				
-				filled_circle(lesInters[i * dims_plateau + j]->position->posX, lesInters[i * dims_plateau + j]->position->posY, getRayonPierre()); 
+				filled_circle(lesInters[i * dims_plateau + j]->position->posX, lesInters[i * dims_plateau + j]->position->posY, getRayonPierre()); //	On trace le cercle
 			}
 		}
 	}
@@ -461,7 +463,7 @@ float getRayonPierre()
 
 Coord* nouvCoord(int x, int y)
 {
-	Coord* coord = malloc(sizeof(Coord));
+	Coord* coord = malloc(sizeof(Coord)); 
 	coord->posX = x;
 	coord->posY = y;
 	return coord;
@@ -471,10 +473,10 @@ Intersection*  nouvIntersection(Coord* coord)
 {
 	Intersection* inter = malloc(sizeof(Intersection));
 	
-	inter->position = coord;
-	inter->estOccupe = false;
-	inter->chMere = NULL;
-	inter->suiteChaine = NULL;
+	inter->position = coord;	// On donne à l'intersection les coordonnées en entrées
+	inter->estOccupe = false;	// Par défaut une intersection n'est pas occupée..
+	inter->chMere = NULL;		//..elle n'appartient à aucune chaine..
+	inter->suiteChaine = NULL;	//..et n'a donc pas de suite
 	
 	return inter;
 }
@@ -631,6 +633,7 @@ void setTypeIntersection (Intersection* inter)
 	{
 		inter->type = BORD_BAS;
 	}
+	// Autres
 	else 
 	{
 		inter->type = DEFAUT;	
@@ -690,18 +693,19 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 	// Si la pierre posée n'appartient pas encore à une chaîne
 	if(pierre->chMere == NULL)
 	{
-		pierre->chMere = chaine; // la pierre ajoutée appartient maintenant à la chaîne
-		pierre->suiteChaine = NULL; // la pierre posée n'a pas de suivant
+		pierre->chMere = chaine; // La pierre ajoutée appartient maintenant à la chaîne
+		pierre->suiteChaine = NULL; // La pierre posée n'a pas de suivant
 		chaine->finChaine->suiteChaine = pierre; // la suite du dernier élément de la chaîne à laquelle on ajoute est désormais la pierre posée
-		chaine->finChaine = pierre; // le dernier élément de ladite chaîne devient la pierre ajoutée
-		chaine->nbPierres++; // on incrémente le nombre d'éléments de la chaîne
+		chaine->finChaine = pierre; // Le dernier élément de ladite chaîne devient la pierre ajoutée
+		chaine->nbPierres++; // On incrémente le nombre d'éléments de la chaîne
 			}
 	// Si la pierre possée appartient déjà à une chaîne (cas où plusieurs chaînes adjacentes)
 	// et que celle de l'intersection adjacente en cours de vérification n'est pas déjà la même
 	else if(chaine != pierre->chMere)
 	{
-		Intersection* parcoursChaine = chaine->debutChaine;
+		Intersection* parcoursChaine = chaine->debutChaine;	// Variable qui parcourt la chaine
 		
+		// On parcourt la chaine de l'intersecion pour leur donner comme chaine celle de la pierre posée
 		do
 		{
 			parcoursChaine->chMere = pierre->chMere;
@@ -710,10 +714,10 @@ void incrementChaine(Chaine* chaine, Intersection* pierre)
 		while(parcoursChaine);
 
 		pierre->chMere->finChaine->suiteChaine = chaine->debutChaine; // On acolle la nouvelle chaine croisée à celle parente à la pierre posée
-		pierre->chMere->finChaine = chaine->finChaine; // on actualise le dernier élément
-		pierre->chMere->nbPierres += chaine->nbPierres;
+		pierre->chMere->finChaine = chaine->finChaine; // On actualise le dernier élément
+		pierre->chMere->nbPierres += chaine->nbPierres; // On augmente le nombre de pierres dans la chaine qui va rester
 		
-		supprimeChaine(chaine); // on libère la chaîne anciennement adjacente
+		supprimeChaine(chaine); // On libère la chaîne anciennement adjacente
 	}
 }
 
@@ -733,37 +737,37 @@ bool estMemeCouleur(Intersection* inter1, Intersection* inter2)
 void initChaine(Intersection* inter)
 {
 	
-	Chaine* c = malloc(sizeof(Chaine));	// on crée une chaine avec allocation
-	inter->chMere = c;	// on indique à l'intersection qu'elle appartient à cette chaine
-	c->debutChaine = inter;	// on indique à la chaine que l'intersection est son point de départ..
-	c->finChaine = inter;	//.. et son point de fin
-	c->nbPierres = 1;	// on fixe le nombre de pierres à 1
+	Chaine* c = malloc(sizeof(Chaine));	// On crée une chaine avec allocation
+	inter->chMere = c;	// On indique à l'intersection qu'elle appartient à cette chaine
+	c->debutChaine = inter;	// On indique à la chaine que l'intersection est son point de départ..
+	c->finChaine = inter;	//..et son point de fin
+	c->nbPierres = 1;	// On fixe le nombre de pierres à 1
 	lesChaines[nbChaines] = c;	// On ajoute la nouvelle chaine au tableau des chaines du jeu
 	nbChaines++;	// On incrémente le nombre total de chaine
 }
 
-void printChaines() 
-{
-	for(int i = 0; i < nbChaines; i++)
-	{
-		printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));	
-	}
-}
+//~ void printChaines() 
+//~ {
+	//~ for(int i = 0; i < nbChaines; i++)
+	//~ {
+		//~ printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));	
+	//~ }
+//~ }
 
-void printInters() 
-{
-	printf("nb de chaines total : %d\n", nbChaines);
-	for(int i = 0; i < dims_plateau; i++)
-	{
-		for(int j = 0; j < dims_plateau; j++)
-		{
-			if(lesInters[i * dims_plateau + j]->estOccupe == true)
-			{
-				printf("%p; libertés = %d\n", lesInters[i * dims_plateau + j], lesInters[i * dims_plateau + j]->nbLibertes);
-			}
-		}
-	}
-}
+//~ void printInters() 
+//~ {
+	//~ printf("nb de chaines total : %d\n", nbChaines);
+	//~ for(int i = 0; i < dims_plateau; i++)
+	//~ {
+		//~ for(int j = 0; j < dims_plateau; j++)
+		//~ {
+			//~ if(lesInters[i * dims_plateau + j]->estOccupe == true)
+			//~ {
+				//~ printf("%p; libertés = %d\n", lesInters[i * dims_plateau + j], lesInters[i * dims_plateau + j]->nbLibertes);
+			//~ }
+		//~ }
+	//~ }
+//~ }
 
 void chainage(Intersection* inter)
 {
@@ -937,37 +941,43 @@ int getNbLibertesChaine(Chaine* chaine)
 	int nbLibChaine = 0;
 	Intersection* inter = chaine->debutChaine;
 	
-	Intersection** lesLibertesInter;
+	Intersection** lesLibertesInter;	// Tableau contenant les liberté que l'on compte (pour ne pas en compter une deux fois si elle est commune à deux intersections)
 	Intersection** lesLibertesChaine = malloc(dims_plateau*dims_plateau*sizeof(Intersection*));
 	
-	bool libDejaListee = false;
+	bool libDejaListee = false; // Sert à indiquer si une liberté se a déjà été comptée (dans le cas ou des intersections ont des libertés communes)
 	
+	// On parcourt la liste chainée dans son intégralité
 	do
 	{
-		lesLibertesInter = getLesLibertes(inter);
+		lesLibertesInter = getLesLibertes(inter); // On récupère les intersections adjacentes qui sont libres (les libertés)
 		
+		// Pour chaque liberté...
 		for(int i = 0; i < inter->nbLibertes; i++)
 		{
+			libDejaListee = false;	// On initie le vérificateur à faux
 			
-			libDejaListee = false;
-			
+			//	Si on a au moins une libertée stockée dans le tableau qui les mémorise...
 			if(lesLibertesChaine != NULL) 
 			{
+				// On parcourt les libertés
 				for (int j = 0; j < nbLibChaine; j++) 
 				{
+					// Si la liberté se trouve déjà dans le tableau qui contient celles stockées
 					if(lesLibertesChaine[j] == lesLibertesInter[i])
 					{
-						libDejaListee = true;
+						libDejaListee = true; // On précise mes le vérificateur à vrai pour ne pas la compter
 						break;
 					}
 				}
 				
+				// Si la liberté n'a pas été comptée auparavent, on l'ajoute au tableau qui les mémorise et on incrémente les libertés
 				if(libDejaListee == false)
 				{
 					lesLibertesChaine[nbLibChaine] = lesLibertesInter[i];
 					nbLibChaine++;
 				}
 			}
+			// Sinon on incrémente et on place la liberté dans la première case
 			else
 			{
 				lesLibertesChaine[0] = lesLibertesInter[i];
@@ -984,8 +994,10 @@ int getNbLibertesChaine(Chaine* chaine)
 
 void supprimeChaine(Chaine* chaine)
 {
+	// On parcourt le tableau contenant les chaines du jeu
 	for(int i = 0; i < nbChaines; i++)
 	{
+		// Si la chaine correspond à celle en entrée, on la supprime du tableau tout dans décallant les chaines suivantes
 		if(lesChaines[i] == chaine)
 		{
 			if(i != nbChaines - 1)
@@ -1010,7 +1022,7 @@ void supprimeChaine(Chaine* chaine)
 
 void freeAll()
 {
-	// on parcourt toutes les intersections...
+	// on parcourt tout pour libérer la mémoire
 	for (int i = 0; i < dims_plateau; i++) 
 	{
 		for (int j = 0; j < dims_plateau; j++)
@@ -1035,23 +1047,9 @@ void freeAll()
 	free(lesChaines);
 }
 
-
-///////////////////////////////
-// PARTIE GESTION DES REGLES //
-///////////////////////////////
-
-
-
 int main() 
 {
 	init_win(COTE_FEN,COTE_FEN, "Jeu de GO",0.988,0.807,0.611);
-	printf("Quelles dimensions ? ");
-	////////////////////////////////////////////////////////////////////
-	// Si oublié les boutons, faire fonction qui check entrée clavier //
-	///////////////////////////////////////////////////////////////////
-	//~ scanf("%d", &dims_plateau);
-	//~ lesInters = creerTableInter();
 	event_loop_plateau();
-	freeAll();
 	return EXIT_SUCCESS;
 }
