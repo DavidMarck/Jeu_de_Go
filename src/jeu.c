@@ -66,9 +66,9 @@ void draw_win_menu()
 	color (1,1,1); // Couleurblanche
 	
 	//on installe les string sur les boutons
-	string(width_win()/2,(MARGE_FEN + 45),"19x19");
-	string(width_win()/2,(MARGE_FEN + 45)+(MARGE_FEN+90),"13x13");
-	string(width_win()/2,(MARGE_FEN + 45)+2*(MARGE_FEN+90),"9x9");
+	string(width_win()/2 - 15,(MARGE_FEN + 45),"19x19");
+	string(width_win()/2 - 15,(MARGE_FEN + 45)+(MARGE_FEN+90),"13x13");
+	string(width_win()/2 - 15,(MARGE_FEN + 45)+2*(MARGE_FEN+90),"9x9");
 	
 }
 
@@ -83,7 +83,7 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 {
 	switch (modeJeu)
 	{
-		case MENU :		// Si on est sur la fenêtre de menu, on définit les coordonnées des boutons sur lesquels on peut cliquer
+		case MENU :		// Si on est sur la fenêtre de menu, on définit les coordonnées des boutons sur lesquels on peut cliquer pour lancer une partie
 		
 			if (x >= MARGE_FEN*5 && x <= width_win() - 5*MARGE_FEN)
 			{
