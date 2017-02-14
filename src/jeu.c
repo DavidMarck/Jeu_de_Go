@@ -264,6 +264,8 @@ Intersection* getIntersection(int x, int y)
 
 bool coupEstPermis(Intersection* inter)
 {
+	bool coupEstPermis = false;
+	
 	bool estVide = interEstVide(inter); // si l'intersection est vide (x=0;y=0), alors c'est que l'utilisateur a cliqué en dehors des intersections cliquables
 	bool estOccupe = inter->estOccupe; // on vérifie que l'intersection concernée ne soit pas occupée
 	int nbLibertes = inter->nbLibertes;
@@ -272,7 +274,7 @@ bool coupEstPermis(Intersection* inter)
 	{
 		if(nbLibertes > 0) // si il y a au moins une liberté, on peut poser
 		{
-			return true;
+			coupEstPermis = true;
 		}
 		else // sinon si il n'y aplus de liberté
 		{	
@@ -281,18 +283,21 @@ bool coupEstPermis(Intersection* inter)
 			
 			for(int i = 0; i < nbAdjacents; i++)
 			{
-				if(lesAdjacents[i]->couleur != tour) // si au moins une intersection adjacente  n'est pas de la même couleur, on ne peut pas poser
+				if(lesAdjacents[i]->couleur != tour) 
 				{
-					free(lesAdjacents);
-					return false;
+					printf(" libertés chaine %p : %d\n",lesAdjacents[i]->chMere,getNbLibertesChaine(lesAdjacents[i]->chMere));
+					if(getNbLibertesChaine(lesAdjacents[i]->chMere) == 1) // La pierre adjacente adverse sera capturée par la pose
+					{
+						coupEstPermis = true;
+						break;
+					}
 				}
 			}
-			
 			free(lesAdjacents);
-			return true; // toutes les intersections adjacentes sont occupées de pierres de la même couleur, on peut poser
 		}
 	}
-	return false;
+	
+	return coupEstPermis;
 }
 
 /**
