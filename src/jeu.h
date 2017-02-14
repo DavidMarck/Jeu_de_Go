@@ -284,13 +284,6 @@ Intersection** getLesLibertes(Intersection* inter);
  bool aAdjacentOccupe(Intersection* inter);
 
 /**
- * 
- */
-void printChaines();
-
-void printInters();
-
-/**
  * Retourne le nombre total des libertés d'une chaîne
  * chaine : la chaîne dont on souhaite connaître le nombre de libertés
  */

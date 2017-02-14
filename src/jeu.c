@@ -38,10 +38,6 @@ void draw_win_plateau()
 	dessine_plateau(); // Dessine le plateau du jeu (en fonction des dimensions choisies dans le menu)
 	dessine_hoshi(); // met en place les hoshis du plateau
 	
-	//~ if( nbChaines > 0) {
-		//~ dessine_Pierres();
-	//~ }
-	
 	//~ color(0.5,0.5,0.5);
 	//~ filled_rectangle(0, height_win() - 20, 100, 20);
 	
@@ -130,14 +126,12 @@ void mouse_clicked_plateau(int bouton, int x, int y)
 			
 			if(coupEstPermis(inter)) // Si le coup est permis
 			{
-				filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on la remplit...
+				filled_circle(inter->position->posX,inter->position->posY,getRayonPierre()); // ... on remplit l'intersection...
 				inter->estOccupe = true; // ... on définit que l'intersection est maintement occupée...
 				inter->couleur = tour; // On adapte la couleur au joueur
 				chainage(inter);  // On gère la création/fusion de chaines
 				updateNbLibertes(); // On met à jour les libertés du plateau
-				
-				updatePlateau();
-					
+				updatePlateau(); // On met à jour le plateau (redessine)
 				changerTour(); // ... et enfin on passe au tour suivant
 			}
 			break;	
@@ -746,29 +740,6 @@ void initChaine(Intersection* inter)
 	nbChaines++;	// On incrémente le nombre total de chaine
 }
 
-//~ void printChaines() 
-//~ {
-	//~ for(int i = 0; i < nbChaines; i++)
-	//~ {
-		//~ printf("%p; libertés = %d\n", lesChaines[i], getNbLibertesChaine(lesChaines[i]));	
-	//~ }
-//~ }
-
-//~ void printInters() 
-//~ {
-	//~ printf("nb de chaines total : %d\n", nbChaines);
-	//~ for(int i = 0; i < dims_plateau; i++)
-	//~ {
-		//~ for(int j = 0; j < dims_plateau; j++)
-		//~ {
-			//~ if(lesInters[i * dims_plateau + j]->estOccupe == true)
-			//~ {
-				//~ printf("%p; libertés = %d\n", lesInters[i * dims_plateau + j], lesInters[i * dims_plateau + j]->nbLibertes);
-			//~ }
-		//~ }
-	//~ }
-//~ }
-
 void chainage(Intersection* inter)
 {
 	// Si une chaine n'est pas à initialiser (car adjacente à une autre de la même couleur)...
@@ -791,7 +762,6 @@ void chainage(Intersection* inter)
 	}
 	else 
 	{
-		printf("Nouvelle chaîne \n");
 		initChaine(inter); // On place l'intersection dans une nouvelle chaine
 	}
 }
