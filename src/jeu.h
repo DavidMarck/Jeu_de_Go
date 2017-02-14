@@ -32,6 +32,11 @@ typedef enum eTypeInter
 	DEFAUT
 } TypeInter;
 
+typedef enum eMode
+{
+	Menu,
+	Jeu
+} Mode;
 
 /** 
  * repésente une coordonnée avec position en x et posotion en y
@@ -83,6 +88,8 @@ typedef struct sChaine
  */
 void draw_win_plateau();
 
+
+void draw_win_menu();
 /**
  * Création du plateau de jeu
  * (appelée dans draw_win_plateau)
@@ -95,6 +102,12 @@ void dessine_plateau();
  */ 
 void dessine_hoshi();
 
+
+/**
+ * 
+ */
+ void dessine_Pierres();
+ 
 /**
  * Remplissage du tableau contenant l'ensemble des intersections
  */

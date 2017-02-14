@@ -11,10 +11,12 @@ int     screen;
 Window  win, root;
 
 extern void draw_win_plateau();
-extern void draw_win_niveau();
+extern void draw_win_menu();
+extern int COTE_FEN;
 extern void mouse_clicked_plateau(int bouton, int x, int y);
 extern void mouse_clicked_niveau(int bouton, int x, int y);
 extern void key_pressed(KeySym code, char c, int x_souris, int y_souris);
+//~ extern struct XSizeHints;
 
 int width_win()
 {
@@ -62,6 +64,13 @@ void event_loop_plateau()
 	KeySym touche;
 	int nb;
 	XEvent ev;
+	
+	//~ XSizeHints* sizeHint = XAllocSizeHints();
+	//~ sizeHint->min_width = COTE_FEN;
+	//~ sizeHint->max_width = COTE_FEN;
+	//~ sizeHint->min_height = COTE_FEN;
+	//~ sizeHint->max_height = COTE_FEN;
+	//~ XSetWMNormalHints(display, win, sizeHint);
 
 	while(1)
 	{
@@ -69,42 +78,10 @@ void event_loop_plateau()
 		switch (ev.type)
 		{
 		case Expose :
-			draw_win_plateau();
+			draw_win_menu();
 			break;
 		case ButtonPress:
 			mouse_clicked_plateau(ev.xbutton.button,ev.xbutton.x,ev.xbutton.y);
-			break;
-		case KeyPress:
-			if ( ev.xkey.keycode == 0x09 ) // ESC : on sort
-				exit(0);
-			nb = XLookupString((XKeyEvent*)&ev, buffer, 20, &touche, 0);
-			buffer[nb] = 0;
-			key_pressed(touche, buffer[0],ev.xbutton.x,ev.xbutton.y);
-			break;
-		default :
-			break;
-		}
-	}
-}
-
-void event_loop_niveau()
-{
-	char buffer[8];
-	KeySym touche;
-	int nb;
-	XEvent ev;
-
-	while(1)
-	{
-		XNextEvent (display, &ev);
-		switch (ev.type)
-		{
-		case Expose :
-			//draw_win_plateau(dim);
-			draw_win_niveau();
-			break;
-		case ButtonPress:
-			mouse_clicked_niveau(ev.xbutton.button,ev.xbutton.x,ev.xbutton.y);
 			break;
 		case KeyPress:
 			if ( ev.xkey.keycode == 0x09 ) // ESC : on sort
